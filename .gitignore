@@ -1,0 +1,9 @@
+# Virtual enviroment
+env/
+
+# Python things
+__pycache__/
+
+# Flask things
+instance/
+.webassets-cache
