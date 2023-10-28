@@ -5,6 +5,7 @@ from flask_login import (
     login_user, LoginManager, login_required, logout_user
 )
 from flask_bcrypt import Bcrypt
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
 app.config.update(
@@ -13,6 +14,7 @@ app.config.update(
 )
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
+CORS(app)
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -35,6 +37,7 @@ def ping():
 
 @app.route('/api/register', methods=['POST'])
 def register():
+
     data = request.get_json()
     
     user = User.query.filter_by(username=data['username']).first()
@@ -55,7 +58,8 @@ def login():
     if user:
         if bcrypt.check_password_hash(user.password, data['password']):
             login_user(user)
-            return jsonify({'login' : True})
+            # obtain role of user
+            return jsonify({'login' : True, 'role' : user.role})
         else:
             return jsonify({'login' : False, 'message' : 'Incorrect password'})
     
@@ -67,11 +71,10 @@ def logout():
     logout_user()
     return jsonify({'logout' : True, 'user_authenticated' : current_user.is_authenticated}) 
 
-# TODO: delete later
-@app.route('/api/protected', methods=['GET'])
-@login_required
+@app.route('/api/home', methods=['GET'])
 def protected():
     if current_user.is_authenticated:
-        return 'This is a protected page'
+        user = current_user.username
+        return jsonify({'message' : 'You are logged in as ' + user})
     else:
-        return 'You are not logged in'
+        return jsonify({'message' : 'You are not logged in'})
