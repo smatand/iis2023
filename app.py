@@ -7,6 +7,7 @@ from flask_login import (
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
 
+
 app = Flask(__name__)
 app.config.update(
     SECRET_KEY='secret',
