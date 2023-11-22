@@ -3,7 +3,7 @@ from models import *
 
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///project.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://admin:changeme@localhost/database"
 db.init_app(app)
 
 
