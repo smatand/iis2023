@@ -18,6 +18,13 @@ class UserEvent(db.Model):
     user_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
     event_id: Mapped[int] = mapped_column(ForeignKey("event.id"))
 
+class EventAdmission(db.Model):
+    __tablename = "event_admission_table"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    event_id: Mapped[int] = mapped_column(ForeignKey("event.id"))
+    admission_id: Mapped[int] = mapped_column(ForeignKey("admission.id"))
+
+
 class User(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False)
@@ -56,6 +63,11 @@ class Event(db.Model):
 
     reviews: Mapped[List["Review"]] = relationship(back_populates="event")
 
+    admissions: Mapped[List["Admission"]] = relationship(
+        secondary="event_admission_table",
+        back_populates="events"
+    )
+
 
 class Category(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -81,6 +93,15 @@ class Review(db.Model):
 
     event_id: Mapped[int] = mapped_column(ForeignKey("event.id"))
     event: Mapped["Event"] = relationship(back_populates="reviews")
+
+class Admission(db.Model):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    amount: Mapped[int] = mapped_column(Integer)
+
+    events: Mapped[List["Event"]] = relationship(
+        secondary="event_admission_table",
+        back_populates="admissions"
+    )
 
 if __name__ == "__main__":
     print("What are you doing?")
