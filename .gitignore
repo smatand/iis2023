@@ -7,3 +7,6 @@ __pycache__/
 # Flask things
 instance/
 .webassets-cache
+
+# config
+*.yaml
