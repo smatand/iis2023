@@ -1,7 +1,5 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import DeclarativeBase
-from models import User
+from models import User, db
 from yaml import load, FullLoader
 
 with open("config.yaml") as f:
@@ -15,12 +13,6 @@ port = cfg["server"]["port"]
 
 database = cfg["database"]["name"]
 
-
-class Base(DeclarativeBase):
-    pass
-
-
-db = SQLAlchemy(model_class=Base)
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = (
