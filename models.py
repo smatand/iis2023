@@ -4,7 +4,7 @@ import enum
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Integer, String, Enum, DateTime
-from sqlalchemy import ForeignKey, Table, Column
+from sqlalchemy import ForeignKey, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 from datetime import datetime
 
@@ -17,29 +17,29 @@ db = SQLAlchemy()
 
 event_category_table = db.Table(
     'event_category',
-    Column('event_id', Integer, primary_key=True,
-           ForeignKey('event.id')),
+    Column('event_id', Integer, ForeignKey('event.id'),
+           primary_key=True),
 
-    Column('category_id', Integer, primary_key=True,
-           ForeignKey('category.id'))
+    Column('category_id', Integer, ForeignKey('category.id'),
+           primary_key=True)
 )
 
 event_user_table = db.Table(
     'event_user',
-    Column('event_id', Integer, primary_key=True,
-           ForeignKey('event.id')),
+    Column('event_id', Integer, ForeignKey('event.id'),
+           primary_key=True),
 
-    Column('user_id', Integer, primary_key=True,
-           ForeignKey('user.id'))
+    Column('user_id', Integer, ForeignKey('user.id'),
+           primary_key=True)
 )
 
 event_admission_table = db.Table(
     'event_admission',
-    Column('event_id', Integer, primary_key=True
-           ForeignKey('event.id')),
+    Column('event_id', Integer, ForeignKey('event.id'),
+           primary_key=True),
 
-    Column('admission_id', Integer, primary_key=True
-           ForeignKey('admission.id'))
+    Column('admission_id', Integer, ForeignKey('admission.id'),
+           primary_key=True)
 )
 
 

@@ -1,6 +1,9 @@
-from models import *
-from app import *
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import DeclarativeBase
+from models import User, Category, Event, Place, Review, Admission, RoleEnum
 from datetime import datetime, timedelta
+from yaml import load, FullLoader
 
 with open("config.yaml") as f:
     cfg = load(f, Loader=FullLoader)
@@ -12,6 +15,13 @@ ip = cfg["server"]["IP"]
 port = cfg["server"]["port"]
 
 database = cfg["database"]["name"]
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+db = SQLAlchemy(model_class=Base)
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = (
