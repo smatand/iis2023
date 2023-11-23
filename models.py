@@ -3,37 +3,51 @@ from typing import List
 import enum
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Integer, String, ForeignKey, Table, Column, Enum, DateTime
+from sqlalchemy import Integer, String, Enum, DateTime
+from sqlalchemy import ForeignKey, Table, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 from datetime import datetime
+
 
 class Base(DeclarativeBase):
     pass
 
+
 db = SQLAlchemy()
 
-event_category_table = db.Table (
+event_category_table = db.Table(
     'event_category',
-    Column('event_id', Integer, ForeignKey('event.id'), primary_key=True),
-    Column('category_id', Integer, ForeignKey('category.id'), primary_key=True)
+    Column('event_id', Integer, primary_key=True,
+           ForeignKey('event.id')),
+
+    Column('category_id', Integer, primary_key=True,
+           ForeignKey('category.id'))
 )
 
-event_user_table = db.Table (
+event_user_table = db.Table(
     'event_user',
-    Column('event_id', Integer, ForeignKey('event.id'), primary_key=True),
-    Column('user_id', Integer, ForeignKey('user.id'), primary_key=True)
+    Column('event_id', Integer, primary_key=True,
+           ForeignKey('event.id')),
+
+    Column('user_id', Integer, primary_key=True,
+           ForeignKey('user.id'))
 )
 
-event_admission_table = db.Table (
+event_admission_table = db.Table(
     'event_admission',
-    Column('event_id', Integer, ForeignKey('event.id'), primary_key=True),
-    Column('admission_id', Integer, ForeignKey('admission.id'), primary_key=True)
+    Column('event_id', Integer, primary_key=True
+           ForeignKey('event.id')),
+
+    Column('admission_id', Integer, primary_key=True
+           ForeignKey('admission.id'))
 )
+
 
 class RoleEnum(enum.Enum):
     user = 1
     moderator = 2
     administrator = 3
+
 
 class User(db.Model):
     __tablename__ = "user"
@@ -91,7 +105,7 @@ class Event(db.Model):
     image: Mapped[str] = mapped_column(String, nullable=True)
 
     place: Mapped["Place"] = relationship(back_populates="events")
-    place_id: Mapped[int] = mapped_column(ForeignKey("place.id"), nullable=True)
+    place_id: Mapped[int] = mapped_column(ForeignKey("place.id"))
 
     users: Mapped[List["User"]] = relationship(
         secondary="event_user",
@@ -99,7 +113,7 @@ class Event(db.Model):
     )
 
     categories: Mapped[List["Category"]] = relationship(
-        secondary="event_category", 
+        secondary="event_category",
         back_populates="events"
     )
 
@@ -128,10 +142,12 @@ class Category(db.Model):
     description: Mapped[str] = mapped_column(String, nullable=True)
 
     parent_id = mapped_column(Integer, ForeignKey("category.id"))
-    parent: Mapped[List["Category"]] = relationship("Category", remote_side=[id])
+    parent: Mapped[List["Category"]] = relationship(
+            "Category", remote_side=[id]
+            )
 
     events: Mapped[List["Event"]] = relationship(
-        secondary="event_category", 
+        secondary="event_category",
         back_populates="categories"
     )
 
@@ -165,6 +181,7 @@ class Review(db.Model):
         db.session.add(self)
         db.session.commit()
 
+
 class Admission(db.Model):
     __tablename__ = "admission"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -178,10 +195,11 @@ class Admission(db.Model):
 
     def get_detail(id: int):
         return db.session.execute(db.select(Admission).filter_by(id=id)).one()
-    
+
     def insert(self):
         db.session.add(self)
         db.session.commit()
+
 
 if __name__ == "__main__":
     print("What are you doing?")
