@@ -1,4 +1,3 @@
-from sqlalchemy.orm import DeclarativeBase
 from models import User, RoleEnum, db
 from yaml import load, FullLoader
 from flask import (
@@ -26,10 +25,6 @@ password = cfg["user"]["password"]
 ip = cfg["server"]["IP"]
 port = cfg["server"]["port"]
 database = cfg["database"]["name"]
-
-
-class Base(DeclarativeBase):
-    pass
 
 
 app = Flask(__name__)
