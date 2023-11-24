@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import List
 import enum
 
+from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Integer, String, Enum, DateTime
 from sqlalchemy import ForeignKey, Column
@@ -49,7 +50,7 @@ class RoleEnum(enum.Enum):
     administrator = 3
 
 
-class User(db.Model):
+class User(UserMixin, db.Model):
     __tablename__ = "user"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String, nullable=False, unique=True)

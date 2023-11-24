@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block body %}
+  <h1>Register</h1>
+  {% if error %}
+    <p class=error><strong>Error:</strong> {{ error }}
+  {% endif %}
+  <form method=post>
+    <dl>
+      <dt>Username:
+      <dd><input type=text name=name value="{{
+          request.form.username }}" required>
+      <dt>Password:
+      <dd><input type=password name=password required>
+    </dl>
+    <p><input type=submit value=Register> <a href="/"><button type=button>Home</button></a> <a href="/login"><button type=button>Login</button></a></p>
+  </form>
+{% endblock %}
