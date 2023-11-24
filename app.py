@@ -1,13 +1,17 @@
-from models import User, RoleEnum, db
+from models import User, RoleEnum, db, Event
+from forms import EventForm
 from yaml import load, FullLoader
+from flask_bcrypt import Bcrypt
+from datetime import datetime
+import calendar
 from flask import (
     redirect,
     request,
     Flask,
     render_template,
-    url_for
+    url_for,
+    flash
 )
-from flask_bcrypt import Bcrypt
 from flask_login import (
     LoginManager,
     login_user,
@@ -52,13 +56,6 @@ def index():
         return redirect(url_for('home'))
 
     return render_template('index.html')
-
-
-@app.route("/home")
-@login_required
-def home():
-    # return current_user.name
-    return render_template('home.html', current_user=current_user)
 
 
 @app.route("/users")
@@ -136,3 +133,59 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+
+@app.route("/create_event", methods=['GET', 'POST'])
+@login_required
+def create_event():
+    form = EventForm()
+    if form.validate_on_submit():
+        event = Event()
+        event.name = form.name.data
+        event.start_datetime = form.start_datetime.data
+        event.end_datetime = form.end_datetime.data
+        event.capacity = form.capacity.data
+        event.description = form.description.data
+        event.image = form.image.data
+        event.place_id = form.place_id.data
+        event.users.append(current_user)
+        db.session.add(event)
+        db.session.commit()
+        flash('Event created successfully!', 'success')
+        return redirect(url_for('home'))
+
+    return render_template(
+        'create_event.html',
+        form=form
+    )
+
+
+@app.route("/home")
+@login_required
+def home():
+    year = request.args.get('year', default=datetime.now().year, type=int)
+    month = request.args.get('month', default=datetime.now().month, type=int)
+    if month < 1:
+        month = 12
+        year -= 1
+    elif month > 12:
+        month = 1
+        year += 1
+
+    month_name = calendar.month_name[month]
+    events = Event.query.filter(Event.users.contains(current_user)).all()
+
+    return render_template(
+        'home.html',
+        events=events,
+        calendar=calendar,
+        month=month,
+        year=year,
+        month_name=month_name
+    )
+
+
+@app.route('/event/<int:id>', methods=['GET'])
+def event(id):
+    event = Event.get_detail(id)
+    return render_template('event.html', event=event)

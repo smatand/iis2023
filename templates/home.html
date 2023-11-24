@@ -1,10 +1,44 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Home</title>
-</head>
-<body>
-    <h1>Welcome, {{ current_user.name }}!</h1>
-</body>
-    <a href="/logout" class="button">Logout</a>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Home</h1>
+    <h3>Welcome, {{ current_user.name }}!</h3>
+    <div style="display: flex; justify-content: space-between;">
+        <button onclick="window.location.href='{{ url_for('home', year=year, month=month-1) }}';">Previous Month</button>
+        <p id="current-month" class="month-display">{{ month_name }}</p>
+        <button onclick="window.location.href='{{ url_for('home', year=year, month=month+1) }}';">Next Month</button>
+    </div>
+    <table>
+        <thead>
+         <tr>
+            <td>Monday</td>
+            <td>Tuesday</td>
+            <td>Wednesday</td>
+            <td>Thursday</td>
+            <td>Friday</td>
+            <td>Saturday</td>
+            <td>Sunday</td>
+        </tr>
+        </thead>
+    {% for week in calendar.monthcalendar(year, month) %}
+    <tr>
+        {% for day in week %}
+        <td>
+            <div class="day">
+                {% if day != 0 %}
+                <div class="day-number">{{ day }}</div>
+                {% for event in events %}
+                    {% if event.start_datetime.day <= day and event.end_datetime.day >= day and event.start_datetime.month == month and event.start_datetime.year == year %}
+                    <button class="event" onclick="window.location.href='{{ url_for('event', id=event.id) }}';">
+                        {{ event.name }}
+                    </button>
+                    {% endif %}
+                {% endfor %}
+                {% endif %}
+            </div>
+        </td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

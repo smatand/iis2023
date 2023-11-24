@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Create Event</h1>
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <p>{{ form.name.label }}*<br>{{ form.name() }}</p>
+        <p>{{ form.start_datetime.label }}*<br>
+        <input type="datetime-local" id="start_datetime" name="start_datetime" value="{{ form.start_datetime.data.strftime('%Y-%m-%dT%H:%M') }}"></p>
+        <p>{{ form.end_datetime.label }}*<br>
+        <input type="datetime-local" id="end_datetime" name="end_datetime" value="{{ form.end_datetime.data.strftime('%Y-%m-%dT%H:%M') }}"></p>
+
+
+        {% if form.end_datetime.errors %}
+            {% for error in form.end_datetime.errors %}
+            <span style="color: red;">[!]</span> {{ error }}
+            {% endfor %}
+        {% endif %}
+        <p>{{ form.capacity.label }}*<br>{{ form.capacity(value=100) }}</p>
+        <p>{{ form.description.label }}*<br>{{ form.description(value="Default Description") }}</p>
+        <p>{{ form.image.label }}<br>{{ form.image() }}</p>
+        <p>{{ form.place_id.label }}*<br>{{ form.place_id(value=1) }}</p>
+        <p>{{ form.submit() }}</p>
+    </form>
+{% endblock %}

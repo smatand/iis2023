@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="event_details">
+        <h2>{{ event.name }}</h2>
+        <div class="detail"><strong>Starts:</strong> <span>{{ event.start_datetime }}</span></div>
+        <div class="detail"><strong>Ends:</strong> <span>{{ event.end_datetime }}</span></div>
+        <div class="detail"><strong>Capacity:</strong> <span>{{ event.capacity }}</span></div>
+        <div class="description">
+            <p>{{ event.description }}</p>
+        </div>
+        {% if event.image %}
+            <img src="{{ event.image }}" alt="Event Image">
+        {% endif %}
+    </div>
+{% endblock %}
