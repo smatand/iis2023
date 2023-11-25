@@ -82,8 +82,11 @@ if __name__ == "__main__":
             role=RoleEnum.administrator
             )
 
-    start = datetime.today()
-    end = start + timedelta(hours=+2)
+    start = (datetime.now() - timedelta(days=1)).strftime(
+            format="%Y-%m-%d %H:%M:%S"
+            )
+    end = datetime.now().strftime(format="%Y-%m-%d %H:%M:%S")
+
     iis = Event(
             name="IIS",
             start_datetime=start,
