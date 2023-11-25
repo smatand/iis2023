@@ -1,5 +1,5 @@
-from models import User, RoleEnum, db, Event
-from forms import EventForm
+from models import User, RoleEnum, db, Event, Place
+from forms import EventForm, PlaceForm
 from yaml import load, FullLoader
 from flask_bcrypt import Bcrypt
 from datetime import datetime
@@ -171,9 +171,21 @@ def create_event():
         event.image = form.image.data
         event.place_id = form.place_id.data
         event.users.append(current_user)
+
+        if Event.query.filter_by(name=event.name).first():
+            flash('Event with the same name already exists')
+            return render_template(
+                'create_event.html',
+                form=form
+            )
+
         db.session.add(event)
         db.session.commit()
-        flash('Event created successfully!', 'success')
+
+        flash(
+            'Event has been created. Wait for the approval from moderators',
+            'success'
+        )
         return redirect(url_for('home'))
 
     return render_template(
@@ -204,3 +216,48 @@ def home():
 def event(id):
     event = Event.get_detail(id)
     return render_template('event.html', event=event)
+
+
+@app.route('/propose_place', methods=['GET', 'POST'])
+@login_required
+def propose_place():
+    form = PlaceForm()
+    if form.validate_on_submit():
+        place = Place()
+        place.name = form.name.data
+        place.address = form.address.data
+        place.description = form.description.data
+
+        if Place.query.filter_by(name=place.name).first():
+            flash('Place with the same name already exists')
+            return render_template(
+                'propose_place.html',
+                form=form
+            )
+
+        if Place.query.filter_by(address=place.address).first():
+            flash('Place with the same address already exists')
+            return render_template(
+                'propose_place.html',
+                form=form
+            )
+
+
+        db.session.add(place)
+        db.session.commit()
+
+        flash(
+            'Event has been proposed. Wait for the approval from moderators',
+            'success'
+        )
+        return redirect(url_for('places'))
+
+    return render_template('propose_place.html', form=form)
+
+
+@app.route('/places', methods=['GET'])
+@login_required
+def places():
+    places = Place.query.all()
+    events = Event.query.all()
+    return render_template('places.html', places=places, events=events)

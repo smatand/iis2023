@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+  <style>
+
+  </style>
+  <header>
+      <h1>Propose a new place</h1>
+  </header>
+  
+  <div class="form-container">
+    <form method="POST">
+      {{ form.hidden_tag() }}
+      <div class="form-field">
+        <label for="name">{{ form.name.label }}*<span>:</span></label>
+        {{ form.name(value="E112") }}
+      </div>
+      <div class="form-field">
+        <label for="address">{{ form.address.label }}*<span>:</span></label>
+        {{ form.address(value="Brno Bozetechova 212") }}
+      </div>
+      <div class="form-field">
+        <label for="description">{{ form.description.label }}<span>:</span></label>
+        {{ form.description()}}
+      </div>
+      {% if form.name.errors %}
+        {% for error in form.name.errors %}
+        <span class="error">[!]</span> {{ error }}
+        {% endfor %}
+      {% endif %}
+      <div class="submit-button">
+        {{ form.submit(class="button-log") }}
+      </div>
+    </form>
+  </div>
+{% endblock %}

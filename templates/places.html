@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <header>
+        <h1>Places</h1>
+    <div style="display: flex; justify-content: center;">
+    <button class="nav-button-2" onclick="window.location.href='{{ url_for('propose_place') }}';">Propose a new place</button>
+    </div>
+    </header>
+
+    <main>
+        <ul class="place-list">
+            {% for place in places %}
+                <li class="place-item">
+                    <h2 class="place-name">{{ place.name }}</h2>
+                    <p class="place-address">{{ place.address }}</p>
+                    <p class="place-description">{{ place.description }}</p>
+                    <div class="event-list">
+                        {% if place.events|length == 0 %}
+                            <p>No events at this place</p>
+                        {% else %}
+                            <p>Events at this place:</p>
+                        {% endif %}
+                        {% for event in place.events %}
+                            <button class="event" onclick="window.location.href='{{ url_for('event', id=event.id) }}';">{{ event.name }}</button>
+                        {% endfor %}
+                    </div>
+
+                </li>
+            {% endfor %}
+        </ul>
+    </main>
+{% endblock %}

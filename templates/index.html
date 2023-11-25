@@ -1,43 +1,50 @@
 {% extends "base.html" %}
 {% block content %}
-  <h1>Overview</h1>
-  <h3>Welcome, {% if current_user.is_authenticated %}{{ current_user.name }}{% else %}guest{% endif %}!</h3>
-  <div style="display: flex; justify-content: space-between;">
-        <button onclick="window.location.href='{{ url_for('index', year=year, month=month-1) }}';">Previous Month</button>
-        <p id="current-month" class="month-display">Events at {{ month_name }} {{ year }}</p>
-        <button onclick="window.location.href='{{ url_for('index', year=year, month=month+1) }}';">Next Month</button>
+    <header>
+    <h1>Overview</h1>
+    <h3>Welcome, {% if current_user.is_authenticated %}{{ current_user.name }}{% else %}guest{% endif %}!</h3>
+    {% if current_user.is_authenticated %}
+    <div style="display: flex; justify-content: center;">
+    <button class="nav-button-2" onclick="window.location.href='{{ url_for('create_event') }}';">Create a new event</button>
+    </div>
+    {% endif %}
+    </header>
+    <div style="display: flex; justify-content: space-between;">
+          <button onclick="window.location.href='{{ url_for('index', year=year, month=month-1) }}';">Previous Month</button>
+          <p id="current-month" class="month-display">Events at {{ month_name }} {{ year }}</p>
+          <button onclick="window.location.href='{{ url_for('index', year=year, month=month+1) }}';">Next Month</button>
     </div>
     <table>
         <thead>
-         <tr>
-            <td>Monday</td>
-            <td>Tuesday</td>
-            <td>Wednesday</td>
-            <td>Thursday</td>
-            <td>Friday</td>
-            <td>Saturday</td>
-            <td>Sunday</td>
-        </tr>
-        </thead>
-    {% for week in calendar.monthcalendar(year, month) %}
-    <tr>
-        {% for day in week %}
-        <td>
-            <div class="day">
-                {% if day != 0 %}
-                <div class="day-number">{{ day }}</div>
-                {% for event in events %}
-                    {% if event.start_datetime.day <= day and event.end_datetime.day >= day and event.start_datetime.month == month and event.start_datetime.year == year %}
-                    <button class="event" onclick="window.location.href='{{ url_for('event', id=event.id) }}';">
-                        {{ event.name }}
-                    </button>
-                    {% endif %}
-                {% endfor %}
-                {% endif %}
-            </div>
-        </td>
-        {% endfor %}
-    </tr>
-    {% endfor %}
+            <tr>
+              <td>Monday</td>
+              <td>Tuesday</td>
+              <td>Wednesday</td>
+              <td>Thursday</td>
+              <td>Friday</td>
+              <td>Saturday</td>
+              <td>Sunday</td>
+            </tr>
+            </thead>
+        {% for week in calendar.monthcalendar(year, month) %}
+        <tr>
+          {% for day in week %}
+          <td>
+              <div class="day">
+                  {% if day != 0 %}
+                  <div class="day-number">{{ day }}</div>
+                  {% for event in events %}
+                      {% if event.start_datetime.day <= day and event.end_datetime.day >= day and event.start_datetime.month == month and event.start_datetime.year == year %}
+                      <button class="event" onclick="window.location.href='{{ url_for('event', id=event.id) }}';">
+                          {{ event.name }}
+                      </button>
+                      {% endif %}
+                  {% endfor %}
+                  {% endif %}
+              </div>
+          </td>
+          {% endfor %}
+      </tr>
+      {% endfor %}
 </table>
 {% endblock %}

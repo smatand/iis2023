@@ -5,24 +5,60 @@
     <title>{% block title %}My Website{% endblock %}</title>
      <link rel="stylesheet" href="{{ url_for('static', filename='calendar.css') }}">
      <link rel="stylesheet" href="{{ url_for('static', filename='event_details.css') }}">
+     <link rel="stylesheet" href="{{ url_for('static', filename='error.css') }}">
+     <link rel="stylesheet" href="{{ url_for('static', filename='list.css') }}">
 </head>
 <body>
+     <div id="myModal" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">×</span>
+            <p id="modalText"></p>
+        </div>
+    </div>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
         {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">
-                {{ message }}
-            </div>
+            <script>
+                // Get the modal
+                var modal = document.getElementById("myModal");
+
+                // Get the <p> element that holds the modal text
+                var modalText = document.getElementById("modalText");
+
+                // Insert the flashed message into the modal text
+                modalText.innerHTML = "{{ message }}";
+
+                // Display the modal
+                modal.style.display = "block";
+
+                // Get the <span> element that closes the modal
+                var span = document.getElementsByClassName("close")[0];
+
+                // When the user clicks on <span> (x), close the modal
+                span.onclick = function() {
+                    modal.style.display = "none";
+                }
+
+                // When the user clicks anywhere outside of the modal, close it
+                window.onclick = function(event) {
+                    if (event.target == modal) {
+                        modal.style.display = "none";
+                    }
+                }
+            </script>
         {% endfor %}
     {% endif %}
     {% endwith %}
+
     <header>
         <nav>
             <ul class="nav-menu">
-                <li><button class="nav-button" onclick="window.location.href='{{ url_for('index') }}';">All events</button></li>
+                <li><button class="nav-button" onclick="window.location.href='{{ url_for('index') }}';">Events</button></li>
                 {% if current_user.is_authenticated %}
                 <li><button class="nav-button" onclick="window.location.href='{{ url_for('home') }}';">Your calendar</button></li>
-                <li><button class="nav-button" onclick="window.location.href='{{ url_for('create_event') }}';">Create event</button></li>
+                <li><button class="nav-button" onclick="window.location.href='{{ url_for('places') }}';">Places</button></li>
                 <li><button class="button-log" onclick="window.location.href='{{ url_for('logout') }}';">Log Out</button></li>
                 {% else %}
                 <li><button class="nav-button" onclick="window.location.href='{{ url_for('login') }}';">Log In</button></li>
