@@ -227,10 +227,7 @@ def event(id):
 
         # review could be added only if current_user is in event.users
         if current_user not in event.users:
-            flash(
-                '''You were not a participant of this event,
-                so you cannot add a review''',
-            )
+            flash('You are not a participant of this event')
             return redirect(url_for('event', id=id))
 
         if Review.query.filter_by(user_id=current_user.id,
@@ -316,8 +313,7 @@ def propose_category():
         db.session.commit()
 
         flash(
-            '''Category has been proposed.
-            Wait for the approval from moderators''',
+            'Category has been proposed, wait for approval',
             'success'
         )
         return redirect(url_for('categories'))
