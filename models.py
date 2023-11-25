@@ -4,7 +4,7 @@ import enum
 
 from flask_login import UserMixin
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Integer, String, Enum, DateTime
+from sqlalchemy import Integer, String, Enum, DateTime, Boolean
 from sqlalchemy import ForeignKey, Column
 from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
 from datetime import datetime
@@ -62,6 +62,7 @@ class User(UserMixin, db.Model):
         back_populates="users"
     )
 
+    owned_events: Mapped[List["Event"]] = relationship(back_populates="owner")
     reviews: Mapped[List["Review"]] = relationship(back_populates="user")
 
     def get_detail(id: int):
@@ -104,6 +105,11 @@ class Event(db.Model):
     capacity: Mapped[int] = mapped_column(Integer, nullable=True)
     description: Mapped[str] = mapped_column(String, nullable=True)
     image: Mapped[str] = mapped_column(String, nullable=True)
+
+    approved: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    owner: Mapped["User"] = relationship(back_populates="owned_events")
+    owner_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
 
     place: Mapped["Place"] = relationship(back_populates="events")
     place_id: Mapped[int] = mapped_column(ForeignKey("place.id"))
