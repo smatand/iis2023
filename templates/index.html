@@ -9,6 +9,17 @@
     </div>
     {% endif %}
     </header>
+<form method="POST" class="filter-form">
+        {{ form.hidden_tag() }}
+        <label for="name">Name:</label>
+        {{ form.name(id='name', class='form-input') }}
+        <label for="category">Category:</label>
+        {{ form.category(id='category', class='form-input') }}
+        <label for="place">Place:</label>
+        {{ form.place(id='place', class='form-input') }}
+        <input type="submit" value="Filter" class="form-submit">
+    </form>
+
     <div style="display: flex; justify-content: space-between;">
           <button onclick="window.location.href='{{ url_for('index', year=year, month=month-1) }}';">Previous Month</button>
           <p id="current-month" class="month-display">Events at {{ month_name }} {{ year }}</p>
@@ -47,4 +58,37 @@
       </tr>
       {% endfor %}
 </table>
+<div id="event-list">
+    <h2>All Events</h2>
+    <table class="event-table">
+        <thead>
+            <tr>
+                <th class="event-table-header">Name</th>
+                <th class="event-table-header">Start Time</th>
+                <th class="event-table-header">End Time</th>
+                <th class="event-table-header">Categories</th>
+                <th class="event-table-header">Place</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for event in events %}
+                <tr class="event-table-row">
+                    <td class="event-table-data"><button class="event" onclick="window.location.href='{{ url_for('event', id=event.id) }}';">{{ event.name }}</button></td>
+                    <td class="event-table-data">{{ event.start_datetime }}</td>
+                    <td class="event-table-data">{{ event.end_datetime }}</td>
+                    <td class="event-table-data">
+                    {% for category in event.categories %}
+                        <div class="event-categories-tag">{{ category.name }}</div>
+                    {% endfor %}
+                    </td>
+                    <td class="event-table-data">
+                            <div class="event-places-tag">{{ event.place.name }}</div>
+                    </td>
+                    
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
 {% endblock %}

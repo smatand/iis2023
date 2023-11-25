@@ -20,15 +20,6 @@ td:hover {
     background-color: #e0e0e0;
 }
 
-.event {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 5px;
-    margin-top: 5px;
-    border-radius: 5px;
-}
-
 button {
     background-color: #DDAF5A;
     border: none;

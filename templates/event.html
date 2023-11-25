@@ -6,6 +6,14 @@
         <div class="detail"><strong>Starts:</strong> <span>{{ event.start_datetime }}</span></div>
         <div class="detail"><strong>Ends:</strong> <span>{{ event.end_datetime }}</span></div>
         <div class="detail"><strong>Capacity:</strong> <span>{{ event.capacity }}</span></div>
+        <div class="detail-cat"><strong>Categories:</strong>
+            {% for category in event.categories %}
+                <div class="event-categories-tag">{{ category.name }}</div>
+            {% endfor %}
+        </div>
+        <div class="detail-cat"><strong>Place:</strong>
+            <div class="event-places-tag">{{ event.place.name }}</div>
+        </div>
         <div class="description">
             <p>{{ event.description }}</p>
         </div>
@@ -30,7 +38,7 @@
             </div>
         {% endfor %}
     </div>
-    {% if current_user.is_authenticated %}
+    {% if current_user in event.users %}
         <h3>Submit a Review</h3>
         <div class="review_form">
             <form method="POST">

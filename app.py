@@ -1,6 +1,7 @@
 from models import User, RoleEnum, db, Event, Place, Category, Review
-from forms import EventForm, PlaceForm, CategoryForm, ReviewForm
+from forms import EventForm, PlaceForm, CategoryForm, ReviewForm, FilterForm
 from yaml import load, FullLoader
+from sqlalchemy import and_, or_
 from flask_bcrypt import Bcrypt
 from datetime import datetime
 import calendar
@@ -62,15 +63,32 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 
-@app.route("/")
+@app.route("/", methods=['GET', 'POST'])
 def index():
-    events = Event.query.all()
+    form = FilterForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        category_ids = form.category.data
+        place_ids = form.place.data
+
+        events = Event.query.filter(and_(
+            Event.name.ilike('%{}%'.format(name)),
+            or_(*[Event.categories.any(
+                id=category_id
+                ) for category_id in category_ids]),
+            or_(*[Event.place.has(
+                id=place_id
+                ) for place_id in place_ids])
+        )).all()
+    else:
+        events = Event.query.all()
 
     month, year = get_month_year()
     month_name = calendar.month_name[month]
 
     return render_template(
         'index.html',
+        form=form,
         events=events,
         current_user=current_user,
         calendar=calendar,
@@ -162,15 +180,23 @@ def logout():
 def create_event():
     form = EventForm()
     if form.validate_on_submit():
+        name = form.name.data
+        category_ids = [id for id, checked in zip([choice[0] for choice in form.category_ids.choices], form.category_ids.data) if checked]
+        place_id = form.place_id.data
+
         event = Event()
-        event.name = form.name.data
+        event.name = name
         event.start_datetime = form.start_datetime.data
         event.end_datetime = form.end_datetime.data
         event.capacity = form.capacity.data
         event.description = form.description.data
         event.image = form.image.data
-        event.place_id = form.place_id.data
+        event.place_id = place_id
         event.users.append(current_user)
+
+        categories = Category.query.filter(Category.id.in_(category_ids)).all()
+        for category in categories:
+            event.categories.append(category)
 
         if Event.query.filter_by(name=event.name).first():
             flash('Event with the same name already exists')
