@@ -13,4 +13,10 @@
             <img src="{{ event.image }}" alt="Event Image">
         {% endif %}
     </div>
+    {% if current_user.is_authenticated %}
+        <div style="display: flex; justify-content: center;">
+            <button class="button-log">Request for entry</button>
+        </div>
+        <p style="text-align: center;">Note: A fee may be required for admission!</p>
+    {% endif %}
 {% endblock %}

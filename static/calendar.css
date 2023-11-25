@@ -48,11 +48,43 @@ button:hover {
     font-size: 20px;
     font-weight: bold;
 }
+
 thead {
-    background-color: #4CAF50;
+    background-color: rgb(71, 38, 11);
+    color: white;
+}
+thead td {
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle;
+}
+thead td:hover {
+    background-color: rgb(71, 38, 11);
     color: white;
 }
 
-thead td {
-    font-weight: bold;
+.button-log {
+    background-color: #dd5a5a;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    margin-left: max;
+}
+.button-log:hover {
+    background-color: #DD0000;
+}
+.nav-menu {
+    display: flex;
+    justify-content: flex-start;
+    list-style-type: none;
+    padding: 0;
+}
+.nav-button {
+    display: block;
 }

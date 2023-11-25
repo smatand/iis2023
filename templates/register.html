@@ -1,17 +1,22 @@
-{% extends "layout.html" %}
-{% block body %}
-  <h1>Register</h1>
-  {% if error %}
-    <p class=error><strong>Error:</strong> {{ error }}
-  {% endif %}
-  <form method=post>
-    <dl>
-      <dt>Username:
-      <dd><input type=text name=name value="{{
-          request.form.username }}" required>
-      <dt>Password:
-      <dd><input type=password name=password required>
-    </dl>
-    <p><input type=submit value=Register> <a href="/"><button type=button>Home</button></a> <a href="/login"><button type=button>Login</button></a></p>
-  </form>
+{% extends "base.html" %}
+{% block content %}
+  <div style="display: flex; justify-content: center;">
+    <form method="POST" >
+      <h1>Register</h1>
+      {% if error %}
+        <p class=error><strong>Error:</strong> {{ error }}
+      {% endif %}
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <label for="name" style="margin-right: 10px;">Username:</label>
+        <input type=text id="name" name=name value="{{ request.form.username }}" required>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <label for="password" style="margin-right: 10px;">Password:</label>
+        <input type=password id="password" name=password required>
+      </div>
+      <div class="nav-menu">
+          <button class="button-log" type=submit>Register</button>
+      </div>
+    </form>
+  </div>
 {% endblock %}

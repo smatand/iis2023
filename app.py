@@ -45,6 +45,18 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
+def get_month_year():
+    year = request.args.get('year', default=datetime.now().year, type=int)
+    month = request.args.get('month', default=datetime.now().month, type=int)
+    if month < 1:
+        month = 12
+        year -= 1
+    elif month > 12:
+        month = 1
+        year += 1
+    return month, year
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
@@ -52,10 +64,20 @@ def load_user(user_id):
 
 @app.route("/")
 def index():
-    if current_user.is_authenticated:
-        return redirect(url_for('home'))
+    events = Event.query.all()
 
-    return render_template('index.html')
+    month, year = get_month_year()
+    month_name = calendar.month_name[month]
+
+    return render_template(
+        'index.html',
+        events=events,
+        current_user=current_user,
+        calendar=calendar,
+        month=month,
+        month_name=month_name,
+        year=year
+    )
 
 
 @app.route("/users")
@@ -163,16 +185,9 @@ def create_event():
 @app.route("/home")
 @login_required
 def home():
-    year = request.args.get('year', default=datetime.now().year, type=int)
-    month = request.args.get('month', default=datetime.now().month, type=int)
-    if month < 1:
-        month = 12
-        year -= 1
-    elif month > 12:
-        month = 1
-        year += 1
-
+    month, year = get_month_year()
     month_name = calendar.month_name[month]
+
     events = Event.query.filter(Event.users.contains(current_user)).all()
 
     return render_template(
