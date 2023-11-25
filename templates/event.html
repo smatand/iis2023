@@ -10,13 +10,40 @@
             <p>{{ event.description }}</p>
         </div>
         {% if event.image %}
-            <img src="{{ event.image }}" alt="Event Image">
+            <img class="event_image" src="{{ event.image }}" alt="Event Image">
         {% endif %}
     </div>
-    {% if current_user.is_authenticated %}
-        <div style="display: flex; justify-content: center;">
+    {% if current_user.is_authenticated and event.start_datetime > now %}
+        <div class="entry_request">
             <button class="button-log">Request for entry</button>
+            <p>Note: A fee may be required for admission!</p>
         </div>
-        <p style="text-align: center;">Note: A fee may be required for admission!</p>
+    {% endif %}
+    {% if event.end_datetime < now %}
+    <div class="reviews">
+        <h3>Reviews</h3>
+        {% for review in event.reviews %}
+            <div class="review">
+                <p class="review-user">{{ review.user.name }}</p>
+                <p class="comment">{{ review.comment }}</p>
+                <p class="rating">Rating: {{ review.rating }} / 10</p>
+            </div>
+        {% endfor %}
+    </div>
+    {% if current_user.is_authenticated %}
+        <h3>Submit a Review</h3>
+        <div class="review_form">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div>
+                    {{ form.comment.label }} {{ form.comment(class="form-control") }}
+                </div>
+                <div>
+                    {{ form.rating.label }} {{ form.rating(class="form-control") }}
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        </div>
+    {% endif %}
     {% endif %}
 {% endblock %}

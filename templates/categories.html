@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <header>
+        <h1>Places</h1>
+    <div style="display: flex; justify-content: center;">
+    <button class="nav-button-2" onclick="window.location.href='{{ url_for('propose_category') }}';">Propose a new category</button>
+    </div>
+    </header>
+
+    <main>
+        <ul class="place-list">
+            {% for category in categories %}
+                <li class="place-item">
+                    <h2 class="place-name">{{ category.name }}</h2>
+                    <p class="place-description">{{ category.description }}</p>
+                    <div class="event-list">
+                        {% if category.events|length == 0 %}
+                            <p>No events from this category</p>
+                        {% else %}
+                            <p>Events from this category:</p>
+                        {% endif %}
+                        {% for event in category.events %}
+                            <button class="event" onclick="window.location.href='{{ url_for('event', id=event.id) }}';">{{ event.name }}</button>
+                        {% endfor %}
+                    </div>
+
+                </li>
+            {% endfor %}
+        </ul>
+    </main>
+{% endblock %}

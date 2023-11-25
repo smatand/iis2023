@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+  <style>
+
+  </style>
+  <header>
+      <h1>Propose a new category</h1>
+  </header>
+  
+  <div class="form-container">
+    <form method="POST">
+      {{ form.hidden_tag() }}
+      <div class="form-field">
+        <label for="name">{{ form.name.label }}<span>:</span></label>
+        {{ form.name(value="Education") }}
+      </div>
+      <div class="form-field">
+        <label for="description">{{ form.description.label }}<span>:</span></label>
+        {{ form.description()}}
+      </div>
+      <div class="form-field">
+        <label for="parent">{{ form.parent_id.label }}<span>:</span></label>
+        {{ form.parent_id()}}
+      </div>
+      <div class="submit-button">
+        {{ form.submit(class="button-log") }}
+      </div>
+    </form>
+  </div>
+{% endblock %}

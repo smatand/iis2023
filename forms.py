@@ -5,9 +5,11 @@ from wtforms import (
     DateTimeField,
     IntegerField,
     SubmitField,
-    ValidationError
+    ValidationError,
+    SelectField,
+    TextAreaField
 )
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Length
 
 
 def validate_date(form, field):
@@ -49,3 +51,23 @@ class PlaceForm(FlaskForm):
     address = StringField('Address', validators=[DataRequired()])
     description = StringField('Description')
     submit = SubmitField('Create Place')
+
+
+class CategoryForm(FlaskForm):
+    name = StringField('Category Name', validators=[DataRequired()])
+    description = StringField('Description')
+    parent_id = SelectField('Parent Category', coerce=int)
+    submit = SubmitField('Create Category')
+
+
+class ReviewForm(FlaskForm):
+    comment = TextAreaField('Comment',
+                            validators=[DataRequired(),
+                                        Length(min=2, max=200)]
+                            )
+    rating = SelectField('Rating',
+                         choices=[(i, i) for i in range(1, 11)],
+                         default=10,
+                         coerce=int
+                         )
+    submit = SubmitField('Submit Review')

@@ -7,6 +7,7 @@
      <link rel="stylesheet" href="{{ url_for('static', filename='event_details.css') }}">
      <link rel="stylesheet" href="{{ url_for('static', filename='error.css') }}">
      <link rel="stylesheet" href="{{ url_for('static', filename='list.css') }}">
+     <link rel="stylesheet" href="{{ url_for('static', filename='review.css') }}">
 </head>
 <body>
      <div id="myModal" class="modal">
@@ -59,6 +60,7 @@
                 {% if current_user.is_authenticated %}
                 <li><button class="nav-button" onclick="window.location.href='{{ url_for('home') }}';">Your calendar</button></li>
                 <li><button class="nav-button" onclick="window.location.href='{{ url_for('places') }}';">Places</button></li>
+                <li><button class="nav-button" onclick="window.location.href='{{ url_for('categories') }}';">Categories</button></li>
                 <li><button class="button-log" onclick="window.location.href='{{ url_for('logout') }}';">Log Out</button></li>
                 {% else %}
                 <li><button class="nav-button" onclick="window.location.href='{{ url_for('login') }}';">Log In</button></li>
