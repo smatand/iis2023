@@ -1,5 +1,5 @@
-from models import User, RoleEnum, db, Event, Place
-from forms import EventForm, PlaceForm
+from models import User, RoleEnum, db, Event, Place, Category, Review
+from forms import EventForm, PlaceForm, CategoryForm, ReviewForm
 from yaml import load, FullLoader
 from flask_bcrypt import Bcrypt
 from datetime import datetime
@@ -212,15 +212,43 @@ def home():
     )
 
 
-@app.route('/event/<int:id>', methods=['GET'])
+@app.route('/event/<int:id>', methods=['GET', 'POST'])
 def event(id):
     event = Event.get_detail(id)
-    return render_template('event.html', event=event)
+    now = datetime.now()
+    form = ReviewForm()
+    if form.validate_on_submit():
+        review = Review(
+            comment=form.comment.data,
+            rating=form.rating.data,
+            event_id=id
+        )
+        review.user_id = current_user.id
+
+        # review could be added only if current_user is in event.users
+        if current_user not in event.users:
+            flash(
+                '''You were not a participant of this event,
+                so you cannot add a review''',
+            )
+            return redirect(url_for('event', id=id))
+
+        if Review.query.filter_by(user_id=current_user.id,
+                                  event_id=id).first():
+            flash('You already have a review for this event')
+            return redirect(url_for('event', id=id))
+
+        db.session.add(review)
+        db.session.commit()
+        return redirect(url_for('event', id=id))
+
+    return render_template('event.html', event=event, now=now, form=form)
 
 
 @app.route('/propose_place', methods=['GET', 'POST'])
 @login_required
 def propose_place():
+    # prolly smth for moderator? todo
     form = PlaceForm()
     if form.validate_on_submit():
         place = Place()
@@ -242,7 +270,6 @@ def propose_place():
                 form=form
             )
 
-
         db.session.add(place)
         db.session.commit()
 
@@ -261,3 +288,38 @@ def places():
     places = Place.query.all()
     events = Event.query.all()
     return render_template('places.html', places=places, events=events)
+
+
+@app.route('/categories', methods=['GET'])
+@login_required
+def categories():
+    categories = Category.query.all()
+    events = Event.query.all()
+    return render_template(
+        'categories.html',
+        categories=categories,
+        events=events)
+
+
+@app.route('/propose_category', methods=['GET', 'POST'])
+@login_required
+def propose_category():
+    form = CategoryForm()
+    form.parent_id.choices = [(c.id, c.name) for c in Category.query.all()]
+    if form.validate_on_submit():
+        category = Category()
+        category.name = form.name.data
+        category.description = form.description.data
+        category.parent_id = form.parent_id.data
+
+        db.session.add(category)
+        db.session.commit()
+
+        flash(
+            '''Category has been proposed.
+            Wait for the approval from moderators''',
+            'success'
+        )
+        return redirect(url_for('categories'))
+
+    return render_template('propose_category.html', form=form)
