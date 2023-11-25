@@ -42,3 +42,10 @@ class EventForm(FlaskForm):
 
         result = True
         return result
+
+
+class PlaceForm(FlaskForm):
+    name = StringField('Place Name', validators=[DataRequired()])
+    address = StringField('Address', validators=[DataRequired()])
+    description = StringField('Description')
+    submit = SubmitField('Create Place')
