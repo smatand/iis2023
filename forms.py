@@ -40,14 +40,21 @@ class EventForm(FlaskForm):
     image = StringField('Image URL')
     place_id = SelectField('Place', validators=[DataRequired()], coerce=int)
     category_ids = SelectMultipleField('Category',
-                                       validators=[Optional()], coerce=int, option_widget=widgets.CheckboxInput(), widget=widgets.ListWidget(prefix_label=False))
+                                       validators=[Optional()],
+                                       coerce=int,
+                                       option_widget=widgets.CheckboxInput(),
+                                       widget=widgets.ListWidget(
+                                           prefix_label=False
+                                           ))
     submit = SubmitField('Create Event')
 
     def __init__(self, *args, **kwargs):
         super(EventForm, self).__init__(*args, **kwargs)
         self.place_id.choices = [(p.id, p.name) for p in Place.query.all()]
-        self.category_ids.choices = [(c.id, c.name) for c in Category.query.all()]
-        
+        self.category_ids.choices = [
+            (c.id, c.name) for c in Category.query.all()
+            ]
+
 
 class PlaceForm(FlaskForm):
     name = StringField('Place Name', validators=[DataRequired()])
