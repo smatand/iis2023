@@ -181,7 +181,10 @@ def create_event():
     form = EventForm()
     if form.validate_on_submit():
         name = form.name.data
-        category_ids = [id for id, checked in zip([choice[0] for choice in form.category_ids.choices], form.category_ids.data) if checked]
+        category_ids = [
+            id for id, checked in zip([choice[0] for choice
+                                       in form.category_ids.choices
+                                       ], form.category_ids.data) if checked]
         place_id = form.place_id.data
 
         event = Event()
