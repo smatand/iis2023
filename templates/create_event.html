@@ -1,25 +1,45 @@
 {% extends "base.html" %}
-
 {% block content %}
-    <h1>Create Event</h1>
-    <form method="POST">
-        {{ form.hidden_tag() }}
-        <p>{{ form.name.label }}*<br>{{ form.name() }}</p>
-        <p>{{ form.start_datetime.label }}*<br>
-        <input type="datetime-local" id="start_datetime" name="start_datetime" value="{{ form.start_datetime.data.strftime('%Y-%m-%dT%H:%M') }}"></p>
-        <p>{{ form.end_datetime.label }}*<br>
-        <input type="datetime-local" id="end_datetime" name="end_datetime" value="{{ form.end_datetime.data.strftime('%Y-%m-%dT%H:%M') }}"></p>
-
-
-        {% if form.end_datetime.errors %}
-            {% for error in form.end_datetime.errors %}
-            <span style="color: red;">[!]</span> {{ error }}
-            {% endfor %}
-        {% endif %}
-        <p>{{ form.capacity.label }}*<br>{{ form.capacity(value=100) }}</p>
-        <p>{{ form.description.label }}*<br>{{ form.description(value="Default Description") }}</p>
-        <p>{{ form.image.label }}<br>{{ form.image() }}</p>
-        <p>{{ form.place_id.label }}*<br>{{ form.place_id(value=1) }}</p>
-        <p>{{ form.submit() }}</p>
+  <div style="display: flex; justify-content: center;">
+    <form method="POST" style="width: 50%;">
+      <h1>Create Event</h1>
+      {{ form.hidden_tag() }}
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <label for="name" style="margin-right: 10px;">{{ form.name.label }}*<span style="font-size: larger;">:</span></label>
+        {{ form.name() }}
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <label for="start_datetime" style="margin-right: 10px;">{{ form.start_datetime.label }}*<span style="font-size: larger;">:</span></label>
+        <input type="datetime-local" id="start_datetime" name="start_datetime" value="{{ form.start_datetime.data.strftime('%Y-%m-%dT%H:%M') }}">
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <label for="end_datetime" style="margin-right: 10px;">{{ form.end_datetime.label }}*<span style="font-size: larger;">:</span></label>
+        <input type="datetime-local" id="end_datetime" name="end_datetime" value="{{ form.end_datetime.data.strftime('%Y-%m-%dT%H:%M') }}">
+      </div>
+      {% if form.end_datetime.errors %}
+        {% for error in form.end_datetime.errors %}
+        <span style="color: red;">[!]</span> {{ error }}
+        {% endfor %}
+      {% endif %}
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <label for="capacity" style="margin-right: 10px;">{{ form.capacity.label }}*<span style="font-size: larger;">:</span></label>
+        {{ form.capacity(value=100) }}
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <label for="image" style="margin-right: 10px;">{{ form.image.label }}<span style="font-size: larger;">:</span></label>
+        {{ form.image() }}
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <label for="place_id" style="margin-right: 10px;">{{ form.place_id.label }}*<span style="font-size: larger;">:</span></label>
+        {{ form.place_id(value=1) }}
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <label for="description" style="margin-right: 10px;">{{ form.description.label }}*<span style="font-size: larger;">:</span></label>
+        {{ form.description(value="Default Description") }}
+      </div>
+      <div style="display: flex; justify-content: center;">
+        {{ form.submit(class="button-log") }}
+      </div>
     </form>
+  </div>
 {% endblock %}

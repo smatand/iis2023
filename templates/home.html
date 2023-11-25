@@ -2,10 +2,10 @@
 
 {% block content %}
     <h1>Home</h1>
-    <h3>Welcome, {{ current_user.name }}!</h3>
+    <h3>Welcome, {{ current_user.name }}! Here's your calendar of events you plan to visit</h3>
     <div style="display: flex; justify-content: space-between;">
         <button onclick="window.location.href='{{ url_for('home', year=year, month=month-1) }}';">Previous Month</button>
-        <p id="current-month" class="month-display">{{ month_name }}</p>
+        <p id="current-month" class="month-display">Your events at {{ month_name }} {{ year }}</p>
         <button onclick="window.location.href='{{ url_for('home', year=year, month=month+1) }}';">Next Month</button>
     </div>
     <table>

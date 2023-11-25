@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}My Website{% endblock %}</title>
-    <!-- Add your CSS files here -->
      <link rel="stylesheet" href="{{ url_for('static', filename='calendar.css') }}">
      <link rel="stylesheet" href="{{ url_for('static', filename='event_details.css') }}">
 </head>
@@ -19,9 +18,16 @@
     {% endwith %}
     <header>
         <nav>
-            <ul>
-                <li><a href="{{ url_for('home') }}">Home</a></li>
-                <li><a href="{{ url_for('create_event') }}">Create Event</a></li>
+            <ul class="nav-menu">
+                <li><button class="nav-button" onclick="window.location.href='{{ url_for('index') }}';">All events</button></li>
+                {% if current_user.is_authenticated %}
+                <li><button class="nav-button" onclick="window.location.href='{{ url_for('home') }}';">Your calendar</button></li>
+                <li><button class="nav-button" onclick="window.location.href='{{ url_for('create_event') }}';">Create event</button></li>
+                <li><button class="button-log" onclick="window.location.href='{{ url_for('logout') }}';">Log Out</button></li>
+                {% else %}
+                <li><button class="nav-button" onclick="window.location.href='{{ url_for('login') }}';">Log In</button></li>
+                <li><button class="nav-button" onclick="window.location.href='{{ url_for('register') }}';">Create a New Account</button></li>
+                {% endif %}
             </ul>
         </nav>
     </header>
