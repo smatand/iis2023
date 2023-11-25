@@ -1,0 +1,67 @@
+.event-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+}
+
+.event-table-header {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: center;
+    padding: 12px 15px;
+}
+
+.event-table-data {
+    padding: 12px 15px;
+}
+
+.event-table-row {
+    border-bottom: 1px solid #dddddd;
+}
+
+.event-table-row:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+
+.event-table-row:last-of-type {
+    border-bottom: 2px solid #009879;
+}
+.event-list-button {
+    background-color: #009879;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.event-list-button:hover {
+    background-color: #0056b3;
+}
+
+.event-categories-tag {
+    display: inline-block;
+    margin-right: 10px;
+    padding: 5px;
+    background-color: #ff7700;
+    border: none;
+    border-radius: 5px;
+    color: white;
+}
+
+
+.event-places-tag {
+    display: inline-block;
+    margin-right: 10px;
+    padding: 5px;
+    background-color: black;
+    border: none;
+    border-radius: 5px;
+    color: white;
+}

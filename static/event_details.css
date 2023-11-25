@@ -11,14 +11,23 @@
 }
 
 .event_details h2 {
-    color: #4CAF50;
-    font-size: 24px;
+    color: black;
+    font-size: 30px;
     margin-bottom: 20px;
 }
 
 .detail {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    justify-content: auto;
+    width: 50%;
+    color: #333;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.detail-cat {
+    display: start;
+    justify-content: start;
     width: 50%;
     color: #333;
     font-size: 18px;

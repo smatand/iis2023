@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from flask_wtf import FlaskForm
+from models import Place, Category
 from wtforms import (
     StringField,
     DateTimeField,
@@ -7,9 +8,11 @@ from wtforms import (
     SubmitField,
     ValidationError,
     SelectField,
-    TextAreaField
+    TextAreaField,
+    SelectMultipleField,
+    widgets
 )
-from wtforms.validators import DataRequired, Length
+from wtforms.validators import DataRequired, Length, Optional
 
 
 def validate_date(form, field):
@@ -35,16 +38,16 @@ class EventForm(FlaskForm):
     capacity = IntegerField('Capacity', validators=[DataRequired()])
     description = StringField('Description', validators=[DataRequired()])
     image = StringField('Image URL')
-    place_id = IntegerField('Place ID', validators=[DataRequired()])
+    place_id = SelectField('Place', validators=[DataRequired()], coerce=int)
+    category_ids = SelectMultipleField('Category',
+                                       validators=[Optional()], coerce=int, option_widget=widgets.CheckboxInput(), widget=widgets.ListWidget(prefix_label=False))
     submit = SubmitField('Create Event')
 
-    def validate(self, extra_validators=None):
-        if not super().validate():
-            return False
-
-        result = True
-        return result
-
+    def __init__(self, *args, **kwargs):
+        super(EventForm, self).__init__(*args, **kwargs)
+        self.place_id.choices = [(p.id, p.name) for p in Place.query.all()]
+        self.category_ids.choices = [(c.id, c.name) for c in Category.query.all()]
+        
 
 class PlaceForm(FlaskForm):
     name = StringField('Place Name', validators=[DataRequired()])
@@ -71,3 +74,24 @@ class ReviewForm(FlaskForm):
                          coerce=int
                          )
     submit = SubmitField('Submit Review')
+
+
+class FilterForm(FlaskForm):
+    name = StringField('Name', validators=[Optional()])
+    category = SelectMultipleField(
+        'Category',
+        validators=[Optional()],
+        coerce=int,
+        option_widget=widgets.CheckboxInput(),
+        widget=widgets.ListWidget(prefix_label=False))
+    place = SelectMultipleField(
+        'Place',
+        validators=[Optional()],
+        coerce=int,
+        option_widget=widgets.CheckboxInput(),
+        widget=widgets.ListWidget(prefix_label=False))
+
+    def __init__(self, *args, **kwargs):
+        super(FilterForm, self).__init__(*args, **kwargs)
+        self.category.choices = [(c.id, c.name) for c in Category.query.all()]
+        self.place.choices = [(p.id, p.name) for p in Place.query.all()]
