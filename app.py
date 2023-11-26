@@ -412,7 +412,7 @@ def event(id):
 
     # don't show unapproved events to users who are not owners
     if (not event.approved and event.owner_id != current_user.id
-    and current_user.role.value < RoleEnum.moderator.value):
+        and current_user.role.value < RoleEnum.moderator.value):
         flash(
             'You cannot see details of unapproved event, '
             'that has not been created by you!')
