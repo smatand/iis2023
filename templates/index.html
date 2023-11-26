@@ -18,10 +18,10 @@
     {{ form.category(id='category', class='form-input') }}
     <label for="place">Place:</label>
     {{ form.place(id='place', class='form-input') }}
+    {% if current_user.is_authenticated %}
     <label for="approved">Only approved:</label>
     {{ form.approved(id='approved', class='form-input') }}
-
-
+    {% endif %}
     <input type="submit" value="Filter" class="form-submit">
 </form>
 
@@ -96,7 +96,11 @@
                     <td class="event-table-data">{{ event.end_datetime }}</td>
                     <td class="event-table-data">
                         {% for category in event.categories %}
+                        {% if category.parent %}
+                        <div class="event-categories-tag">{{ category.parent.name }}|{{ category.name }}</div>
+                        {% else %}
                         <div class="event-categories-tag">{{ category.name }}</div>
+                        {% endif %}
                         {% endfor %}
                     </td>
                     <td class="event-table-data">
