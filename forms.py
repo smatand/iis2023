@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from flask_wtf import FlaskForm
-from models import Place, Category, RoleEnm
+from models import Place, Category, RoleEnum
 from utils import get_category_choices
 
 from wtforms import (
