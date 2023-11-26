@@ -14,6 +14,18 @@
                 <li class="place-item">
                     <h2 class="place-name">{{ category.name }}</h2>
                     <p class="place-description">{{ category.description }}</p>
+                    <div class="subcategory-list">
+                        {% if category.children|length == 0 %}
+                            <p>No subcategories</p>
+                        {% else %}
+                            <p>Subcategories:</p>
+                            <ul>
+                            {% for subcategory in category.children %}
+                                <li>{{ subcategory.name }}</li>
+                            {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
                     <div class="event-list">
                         {% if category.events|length == 0 %}
                             <p>No events from this category</p>
