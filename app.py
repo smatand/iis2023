@@ -1,5 +1,5 @@
 from models import User, RoleEnum, db, Event, Place, Category, Review
-from forms import EventForm, PlaceForm, CategoryForm, ReviewForm, FilterForm
+from forms import EventForm, PlaceForm, CategoryForm, ReviewForm, FilterForm, EventAttendanceForm, EventAttendanceCancelForm
 from yaml import load, FullLoader
 from sqlalchemy import and_, or_
 from flask_bcrypt import Bcrypt
@@ -207,7 +207,6 @@ def create_event():
         event.description = form.description.data
         event.image = form.image.data
         event.place_id = place_id
-        event.users.append(current_user)
         event.owner_id = current_user.id
 
         categories = Category.query.filter(Category.id.in_(category_ids)).all()
@@ -258,30 +257,65 @@ def home():
 def event(id):
     event = Event.query.get(id)
     now = datetime.now()
+    filled_capacity = len(event.users)
     form = ReviewForm()
-    if form.validate_on_submit():
-        review = Review(
-            comment=form.comment.data,
-            rating=form.rating.data,
-            event_id=id
-        )
-        review.user_id = current_user.id
+    attend_form = EventAttendanceForm()
+    cancel_attend_form = EventAttendanceCancelForm()
 
-        # review could be added only if current_user is in event.users
-        if current_user not in event.users:
-            flash('You are not a participant of this event')
+    if request.method == 'POST':
+
+        if form.validate_on_submit() and 'submit_review' in request.form:
+            review = Review(
+                comment=form.comment.data,
+                rating=form.rating.data,
+                event_id=id
+            )
+            review.user_id = current_user.id
+
+            # review could be added only if current_user is in event.users
+            if current_user not in event.users:
+                flash('You are not a participant of this event')
+                return redirect(url_for('event', id=id))
+
+            if Review.query.filter_by(user_id=current_user.id,
+                                      event_id=id).first():
+                flash('You already have a review for this event')
+                return redirect(url_for('event', id=id))
+
+            db.session.add(review)
+            db.session.commit()
+            return redirect(url_for('event', id=id))
+        elif attend_form.validate_on_submit() and 'attend' in request.form:
+            if current_user in event.users:
+                flash('You are already a participant of this event')
+                return redirect(url_for('event', id=id))
+
+            if filled_capacity == event.capacity:
+                flash('Sorry, this event is full')
+                return redirect(url_for('event', id=id))
+
+            event.users.append(current_user)
+            db.session.commit()
             return redirect(url_for('event', id=id))
 
-        if Review.query.filter_by(user_id=current_user.id,
-                                  event_id=id).first():
-            flash('You already have a review for this event')
+        elif cancel_attend_form.validate_on_submit() and 'cancel_attend' in request.form:
+            if current_user not in event.users:
+                flash('You are not a participant of this event')
+                return redirect(url_for('event', id=id))
+
+            event.users.remove(current_user)
+            db.session.commit()
             return redirect(url_for('event', id=id))
 
-        db.session.add(review)
-        db.session.commit()
-        return redirect(url_for('event', id=id))
+    # don't show unapproved events to users who are not owners
+    if not event.approved and event.owner_id != current_user.id:
+        flash('You cannot see details of unapproved event, that has not been created by you!')
+        return redirect(url_for('index'))
 
-    return render_template('event.html', event=event, now=now, form=form)
+    return render_template('event.html', event=event, now=now, form=form,
+                           filled_capacity=filled_capacity,
+                           attend_form=attend_form,
+                           cancel_attend_form=cancel_attend_form)
 
 
 @app.route('/propose_place', methods=['GET', 'POST'])
