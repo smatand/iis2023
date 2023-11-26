@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from flask_wtf import FlaskForm
-from models import Place, Category
+from models import Place, Category, RoleEnm
 from utils import get_category_choices
+
 from wtforms import (
     StringField,
     DateTimeField,
@@ -153,3 +154,13 @@ class FilterForm(FlaskForm):
         super(FilterForm, self).__init__(*args, **kwargs)
         self.category.choices = get_category_choices()
         self.place.choices = [(p.id, p.name) for p in Place.query.all()]
+
+
+class UserSearchForm(FlaskForm):
+    search = StringField('Search User')
+    submit = SubmitField('Search')
+
+
+class UserUpdateForm(FlaskForm):
+    role = SelectField('Set Role', choices=[(role.name) for role in RoleEnum])
+    submit = SubmitField('Update')

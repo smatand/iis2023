@@ -1,6 +1,6 @@
 user:
-  name: name
-  password: pwd
+  name: admin
+  password: changeme
 
 server:
   IP: 127.0.0.1

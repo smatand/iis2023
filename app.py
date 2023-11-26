@@ -16,7 +16,9 @@ from forms import (
     EventAttendanceForm,
     EventAttendanceCancelForm,
     DeleteReviewForm,
-    EditEventForm
+    EditEventForm,
+    UserSearchForm,
+    UserUpdateForm
 )
 from yaml import load, FullLoader
 from sqlalchemy import and_, or_
@@ -139,11 +141,38 @@ def index():
     )
 
 
-@app.route("/users")
+@app.route("/users", methods=['GET', 'POST'])
+@login_required
 def users():
-    user_list = User.get_list()
-    print(user_list)
-    return str(user_list)
+    if current_user.role.value < RoleEnum.administrator.value:
+        return redirect(url_for('index'))
+
+    users = User.query.all()
+    form = UserSearchForm()
+
+    if form.validate_on_submit():
+        search_term = form.search.data
+        users = User.query.filter(User.name == search_term).all()
+
+    return render_template('users.html', form=form, users=users)
+
+
+@app.route("/edit_user/<int:id>", methods=['GET', 'POST'])
+@login_required
+def edit_user(id):
+    if current_user.role.value < RoleEnum.administrator.value:
+        return redirect(url_for('index'))
+
+    user = User.query.get_or_404(id)
+    form = UserUpdateForm()
+
+    if form.validate_on_submit():
+        desired_role = form.role.data
+        user.role = RoleEnum[desired_role].name
+        db.session.commit()
+        return redirect(url_for('edit_user', id=id))
+
+    return render_template('edit_user.html', form=form, user=user)
 
 
 @app.route("/register", methods=['GET', 'POST'])
