@@ -10,7 +10,8 @@ from wtforms import (
     SelectField,
     TextAreaField,
     SelectMultipleField,
-    widgets
+    widgets,
+    BooleanField
 )
 from wtforms.validators import DataRequired, Length, Optional
 
@@ -97,6 +98,8 @@ class FilterForm(FlaskForm):
         coerce=int,
         option_widget=widgets.CheckboxInput(),
         widget=widgets.ListWidget(prefix_label=False))
+
+    approved = BooleanField('Only approved', default=False)
 
     def __init__(self, *args, **kwargs):
         super(FilterForm, self).__init__(*args, **kwargs)

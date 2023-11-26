@@ -68,6 +68,16 @@
     padding: 5px 10px;
 }
 
+.event-unapproved {
+    background-color: #ffffff;
+    border: dashed;
+    border-radius: 5px;
+    border-color: #007bff;
+    color: #007bff;
+    cursor: pointer;
+    padding: 5px 10px;
+}
+
 .event-list {
     .event-list {
     display: flex;
