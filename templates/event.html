@@ -4,8 +4,9 @@
     <div class="event_details">
         <h2>{{ event.name }}</h2>
         {% if event.approved == false %}
-            <div>UNAPPROVED: Waiting for approval from moderators</div>
+            <div style="color: red;"">UNAPPROVED: Waiting for approval from moderators</div>
         {% endif %}
+        <a href="{{ url_for('edit_event', id=event.id) }}" class="button-log">Edit Event</a>
         <div class="detail"><strong>Created by:</strong> <span>{{ event.owner.name }}</span></div>
         <div class="detail"><strong>Starts:</strong> <span>{{ event.start_datetime }}</span></div>
         <div class="detail"><strong>Ends:</strong> <span>{{ event.end_datetime }}</span></div>
@@ -25,19 +26,21 @@
             <img class="event_image" src="{{ event.image }}" alt="Event Image">
         {% endif %}
     </div>
-    {% if current_user.is_authenticated and event.start_datetime > now and current_user not in event.users and event.approved %}
+    {% if current_user.is_authenticated and event.start_datetime > now and event.approved %}
+        {% if current_user not in event.users %}
         <form method="POST">
             {{ attend_form.hidden_tag() }}
              <button type="submit" name="attend" class="button-log">Attend</button>
         </form>
-    {% elif current_user.is_authenticated and event.start_datetime > now and current_user in event.users and event.approved %}
+        {% else %}
         <form method="POST">
             {{ cancel_attend_form.hidden_tag() }}
              <button type="submit" name="cancel_attend" class="button-log">Cancel attend</button>
         </form>
+        {% endif %}
     {% endif %}
 
-    {% if event.end_datetime < now %}
+    {% if event.end_datetime < now and event.approved %}
     <div class="reviews">
         <h3>Reviews</h3>
         {% for review in event.reviews %}
@@ -48,8 +51,8 @@
             </div>
         {% endfor %}
     </div>
-    {% if current_user in event.users and event.end_datetime < now %}
-        <h3>Submit a Review</h3>
+    {% if current_user in event.users %}
+        <h3>How did you like the event?</h3>
         <div class="review_form">
             <form method="POST">
                 {{ form.hidden_tag() }}

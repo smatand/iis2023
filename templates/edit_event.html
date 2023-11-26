@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+  <style>
+
+  </style>
+  <header>
+      <h1>Edit event '{{ event.name }}'</h1>
+  </header>
+  
+  <div class="form-container">
+    <form method="POST">
+      {{ form.hidden_tag() }}
+      <div class="form-field">
+        <label for="start_datetime">{{ form.start_datetime.label }}*<span>:</span></label>
+        <input type="datetime-local" id="start_datetime" name="start_datetime" value="{{ form.start_datetime.data.strftime('%Y-%m-%dT%H:%M') }}">
+      </div>
+      <div class="form-field">
+        <label for="end_datetime">{{ form.end_datetime.label }}*<span>:</span></label>
+        <input type="datetime-local" id="end_datetime" name="end_datetime" value="{{ form.end_datetime.data.strftime('%Y-%m-%dT%H:%M') }}">
+      </div>
+      {% if form.end_datetime.errors %}
+        {% for error in form.end_datetime.errors %}
+        <span class="error">[!]</span> {{ error }}
+        {% endfor %}
+      {% endif %}
+      <div class="form-field">
+        <label for="capacity">{{ form.capacity.label }}*<span>:</span></label>
+        {{ form.capacity(value=5) }}
+      </div>
+      <div class="form-field">
+        <label for="image">{{ form.image.label }}<span>:</span></label>
+        {{ form.image() }}
+      </div>
+      <div class="form-field">
+        <label for="place_id">{{ form.place_id.label }}*<span>:</span></label>
+        {{ form.place_id(value=1) }}
+      </div>
+      <div class=""form-field">
+        <label for="category_id">{{ form.category_ids.label }}<span>:</span></label>
+        {{ form.category_ids() }}
+      </div>
+      <div class="form-field">
+        <label for="description">{{ form.description.label }}*<span>:</span></label>
+        {{ form.description(value="Default Description") }}
+      </div>
+      <div class="submit-button">
+        {{ form.submit(class="button-log") }}
+      </div>
+    </form>
+  </div>
+{% endblock %}

@@ -1,5 +1,5 @@
 from models import User, RoleEnum, db, Event, Place, Category, Review
-from forms import EventForm, PlaceForm, CategoryForm, ReviewForm, FilterForm, EventAttendanceForm, EventAttendanceCancelForm, DeleteReviewForm
+from forms import EventForm, PlaceForm, CategoryForm, ReviewForm, FilterForm, EventAttendanceForm, EventAttendanceCancelForm, DeleteReviewForm, EditEventForm
 from yaml import load, FullLoader
 from sqlalchemy import and_, or_
 from flask_bcrypt import Bcrypt
@@ -233,6 +233,51 @@ def create_event():
         'create_event.html',
         form=form
     )
+
+
+@app.route("/edit_event/<int:id>", methods=['GET', 'POST'])
+@login_required
+def edit_event(id):
+    event = Event.query.get_or_404(id)
+    if event.owner_id != current_user.id:
+        flash('This is not your event to edit!')
+
+    form = EditEventForm()
+    if form.validate_on_submit():
+        category_ids = [
+            id for id, checked in zip([choice[0] for choice
+                                       in form.category_ids.choices
+                                       ], form.category_ids.data) if checked]
+        place_id = form.place_id.data
+
+        event.start_datetime = form.start_datetime.data
+        event.end_datetime = form.end_datetime.data
+        event.capacity = form.capacity.data
+        event.description = form.description.data
+        event.image = form.image.data
+        event.place_id = place_id
+
+        categories = Category.query.filter(Category.id.in_(category_ids)).all()
+        event.categories.clear()
+        for category in categories:
+            event.categories.append(category)
+
+        db.session.commit()
+
+        flash('Your event has been updated!', 'success')
+        return redirect(url_for('event', id=event.id))
+
+    elif request.method == 'GET':
+        form.start_datetime.data = event.start_datetime
+        form.end_datetime.data = event.end_datetime
+        form.capacity.data = event.capacity
+        form.description.data = event.description
+        form.image.data = event.image
+        form.place_id.data = event.place_id
+        form.category_ids.data = [category.id for category in event.categories]
+
+    return render_template('edit_event.html',
+                           form=form, event=event)
 
 
 @app.route("/home")
