@@ -64,6 +64,7 @@
                 <li><button class="nav-button" onclick="window.location.href='{{ url_for('places') }}';">Places</button></li>
                 <li><button class="nav-button" onclick="window.location.href='{{ url_for('categories') }}';">Categories</button></li>
                 <li><button class="button-log" onclick="window.location.href='{{ url_for('logout') }}';">Log Out</button></li>
+                <li class="username-display">{{ current_user.name }}</li>
                 {% else %}
                 <li><button class="nav-button" onclick="window.location.href='{{ url_for('login') }}';">Log In</button></li>
                 <li><button class="nav-button" onclick="window.location.href='{{ url_for('register') }}';">Create a New Account</button></li>
