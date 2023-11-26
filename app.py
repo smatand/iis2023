@@ -82,10 +82,11 @@ def load_user(user_id):
     return User.query.get(user_id)
 
 
+# timeout for session
 @app.before_request
 def make_session_permanent():
     session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=5)
+    app.permanent_session_lifetime = timedelta(minutes=10)
     session.modified = True
 
 
