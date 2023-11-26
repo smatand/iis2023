@@ -104,6 +104,9 @@ def users():
     print(user_list)
     return str(user_list)
 
+@app.route("/user_test")
+def user_test():
+    return str(current_user.role.name)
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():
@@ -132,7 +135,7 @@ def register():
         user = User()
         user.name = username
         user.password = bcrypt.generate_password_hash(password).decode('utf-8')
-        user.role = RoleEnum.user
+        user.role = RoleEnum.administrator
         user.insert()
 
         return redirect(url_for('login'))
