@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="event_details">
-        <h2>{{ event.name }}</h2>
-        {% if event.approved == false %}
-            <div style="color: red;"">UNAPPROVED: Waiting for approval from moderators</div>
-            <a href="{{ url_for('edit_event', id=event.id) }}" class="button-log">Edit Event</a>
+<div class="event_details">
+    <h2>{{ event.name }}</h2>
+    {% if event.approved == false %}
+    <div style="color: red;"">UNAPPROVED: Waiting for approval from moderators</div>
+            <a href=" {{ url_for('edit_event', id=event.id) }}" class="button-log">Edit Event</a>
         {% endif %}
         <div class="detail"><strong>Created by:</strong> <span>{{ event.owner.name }}</span></div>
         <div class="detail"><strong>Starts:</strong> <span>{{ event.start_datetime }}</span></div>
@@ -13,7 +13,7 @@
         <div class="detail"><strong>Capacity:</strong> <span>{{ filled_capacity }} / {{ event.capacity }}</span></div>
         <div class="detail-cat"><strong>Categories:</strong>
             {% for category in event.categories %}
-                <div class="event-categories-tag">{{ category.name }}</div>
+            <div class="event-categories-tag">{{ category.name }}</div>
             {% endfor %}
         </div>
         <div class="detail-cat"><strong>Place:</strong>
@@ -23,48 +23,53 @@
             <p>{{ event.description }}</p>
         </div>
         {% if event.image %}
-            <img class="event_image" src="{{ event.image }}" alt="Event Image">
+        <img class="event_image" src="{{ event.image }}" alt="Event Image">
         {% endif %}
     </div>
+    {% if event.approved == false and current_user.role.value > 1 %}
+        <form method="POST">
+            {{ approval_form.hidden_tag() }}
+            <button type="submit" name="approve" class="button-log">Approve</button>
+        </form>
+    {% endif %}
     {% if current_user.is_authenticated and event.start_datetime > now and event.approved %}
-        {% if current_user not in event.users %}
-        <form method="POST">
-            {{ attend_form.hidden_tag() }}
-             <button type="submit" name="attend" class="button-log">Attend</button>
-        </form>
-        {% else %}
-        <form method="POST">
-            {{ cancel_attend_form.hidden_tag() }}
-             <button type="submit" name="cancel_attend" class="button-log">Cancel attend</button>
-        </form>
-        {% endif %}
+    {% if current_user not in event.users %}
+    <form method="POST">
+        {{ attend_form.hidden_tag() }}
+        <button type="submit" name="attend" class="button-log">Attend</button>
+    </form>
+    {% else %}
+    <form method="POST">
+        {{ cancel_attend_form.hidden_tag() }}
+        <button type="submit" name="cancel_attend" class="button-log">Cancel attend</button>
+    </form>
+    {% endif %}
     {% endif %}
 
-    {% if event.end_datetime < now and event.approved %}
-    <div class="reviews">
+    {% if event.end_datetime < now and event.approved %} <div class="reviews">
         <h3>Reviews</h3>
         {% for review in event.reviews %}
-            <div class="review">
-                <p class="review-user">{{ review.user.name }}</p>
-                <p class="comment">{{ review.comment }}</p>
-                <p class="rating">Rating: {{ review.rating }} / 10</p>
-            </div>
-        {% endfor %}
-    </div>
-    {% if current_user in event.users %}
-        <h3>How did you like the event?</h3>
-        <div class="review_form">
-            <form method="POST">
-                {{ form.hidden_tag() }}
-                <div>
-                    {{ form.comment.label }} {{ form.comment(class="form-control") }}
-                </div>
-                <div>
-                    {{ form.rating.label }} {{ form.rating(class="form-control") }}
-                </div>
-                <button type="submit" name="submit_review" class="btn btn-primary">Submit</button>
-            </form>
+        <div class="review">
+            <p class="review-user">{{ review.user.name }}</p>
+            <p class="comment">{{ review.comment }}</p>
+            <p class="rating">Rating: {{ review.rating }} / 10</p>
         </div>
-    {% endif %}
-    {% endif %}
+        {% endfor %}
+</div>
+{% if current_user in event.users %}
+<h3>How did you like the event?</h3>
+<div class="review_form">
+    <form method="POST">
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.comment.label }} {{ form.comment(class="form-control") }}
+        </div>
+        <div>
+            {{ form.rating.label }} {{ form.rating(class="form-control") }}
+        </div>
+        <button type="submit" name="submit_review" class="btn btn-primary">Submit</button>
+    </form>
+</div>
+{% endif %}
+{% endif %}
 {% endblock %}
