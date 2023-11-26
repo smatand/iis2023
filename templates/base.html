@@ -62,7 +62,7 @@
                 {% if current_user.is_authenticated %}
                 <li><button class="nav-button" onclick="window.location.href='{{ url_for('places') }}';">Places</button></li>
                 <li><button class="nav-button" onclick="window.location.href='{{ url_for('categories') }}';">Categories</button></li>
-                <li><button class="nav-button-my" onclick="window.location.href='{{ url_for('home') }}';">Your calendar</button></li>
+                <li><button class="nav-button-my" onclick="window.location.href='{{ url_for('home') }}';">My calendar</button></li>
                 <li><button class="nav-button-my" onclick="window.location.href='{{ url_for('my_reviews') }}';">My reviews</button></li>
                 <li><button class="button-log" onclick="window.location.href='{{ url_for('logout') }}';">Log Out</button></li>
                 <li class="username-display">{{ current_user.name }}</li>
