@@ -12,15 +12,15 @@
       {{ form.hidden_tag() }}
       <div class="form-field">
         <label for="name">{{ form.name.label }}<span>:</span></label>
-        {{ form.name(value="Education") }}
+        {{ form.name(id="name", value="Education") }}
       </div>
       <div class="form-field">
         <label for="description">{{ form.description.label }}<span>:</span></label>
-        {{ form.description()}}
+        {{ form.description(id="description")}}
       </div>
       <div class="form-field">
-        <label for="parent">{{ form.parent_id.label }}<span>:</span></label>
-        {{ form.parent_id()}}
+          <label for="parent_id">{{ form.parent_id.label }}<span>:</span></label>
+          {{ form.parent_id(id="parent_id")}}
       </div>
       <div class="submit-button">
         {{ form.submit(class="button-log") }}

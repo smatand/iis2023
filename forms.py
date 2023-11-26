@@ -100,10 +100,10 @@ class PlaceForm(FlaskForm):
 
 
 class CategoryForm(FlaskForm):
-    name = StringField('Category Name', validators=[DataRequired()])
-    description = StringField('Description')
-    parent_id = SelectField('Parent Category', coerce=int)
-    submit = SubmitField('Create Category')
+    name = StringField('Name', validators=[DataRequired()])
+    description = TextAreaField('Description')
+    parent_id = SelectField('Parent ID')
+    submit = SubmitField('Propose')
 
 
 class ReviewForm(FlaskForm):

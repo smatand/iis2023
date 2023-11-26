@@ -458,26 +458,50 @@ def categories():
         events=events)
 
 
+def get_category_choices():
+    categories = Category.query.all()
+
+    def get_category_tree(category, prefix=''):
+        choices = [(category.id, prefix + category.name)]
+        for subcategory in category.children:
+            choices.extend(get_category_tree(subcategory, prefix + '-'))
+        return choices
+    choices = [(None, '-----no parent category----')]
+    for category in categories:
+        if category.parent is None:
+            choices.extend(get_category_tree(category))
+    return choices
+
+
 @app.route('/propose_category', methods=['GET', 'POST'])
-@login_required
 def propose_category():
     form = CategoryForm()
-    form.parent_id.choices = [(c.id, c.name) for c in Category.query.all()]
+    form.parent_id.choices = get_category_choices()
     if form.validate_on_submit():
-        category = Category()
-        category.name = form.name.data
-        category.description = form.description.data
-        category.parent_id = form.parent_id.data
+        parent_id = int(
+            form.parent_id.data
+            ) if form.parent_id.data != 'None' else None
+        category = Category(
+            name=form.name.data,
+            description=form.description.data,
+            parent_id=parent_id
+            )
+
+        if Category.query.filter(
+            Category.name.like('%' + category.name + '%'),
+                Category.parent_id == category.parent_id).first():
+            flash(
+                'Category with a similar name already exists under one parent'
+            )
+            return render_template(
+                'propose_category.html',
+                form=form
+            )
 
         db.session.add(category)
         db.session.commit()
-
-        flash(
-            'Category has been proposed, wait for approval',
-            'success'
-        )
-        return redirect(url_for('categories'))
-
+        flash('Your category proposal has been submitted.')
+        return redirect(url_for('index'))
     return render_template('propose_category.html', form=form)
 
 
