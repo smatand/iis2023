@@ -153,9 +153,11 @@ class FilterForm(FlaskForm):
         self.category.choices = [(c.id, c.name) for c in Category.query.all()]
         self.place.choices = [(p.id, p.name) for p in Place.query.all()]
 
+
 class UserSearchForm(FlaskForm):
     search = StringField('Search User')
     submit = SubmitField('Search')
+
 
 class UserUpdateForm(FlaskForm):
     role = SelectField('Set Role', choices=[(role.name) for role in RoleEnum])

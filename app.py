@@ -136,7 +136,7 @@ def index():
 def users():
     if current_user.role.value < RoleEnum.administrator.value:
         return redirect(url_for('index'))
-    
+
     users = User.query.all()
     form = UserSearchForm()
 
@@ -152,7 +152,7 @@ def users():
 def edit_user(id):
     if current_user.role.value < RoleEnum.administrator.value:
         return redirect(url_for('index'))
-    
+
     user = User.query.get_or_404(id)
     form = UserUpdateForm()
 
