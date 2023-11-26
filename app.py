@@ -242,6 +242,10 @@ def edit_event(id):
     if event.owner_id != current_user.id:
         flash('This is not your event to edit!')
 
+    if event.approved is True:
+        flash('You cannot edit approved event!')
+        return redirect(url_for('event', id=id))
+
     form = EditEventForm()
     if form.validate_on_submit():
         category_ids = [
