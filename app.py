@@ -284,6 +284,9 @@ def edit_event(id):
         for category in categories:
             event.categories.append(category)
 
+        if event.approved is True:
+            flash('You cannot edit approved event!')
+            return redirect(url_for('event', id=id))
         db.session.commit()
 
         flash('Your event has been updated!', 'success')
@@ -399,15 +402,17 @@ def propose_place():
         place.address = form.address.data
         place.description = form.description.data
 
-        if Place.query.filter_by(name=place.name).first():
-            flash('Place with the same name already exists')
+        if Place.query.filter(Place.name.like('%' + place.name + '%')).first():
+            flash('Place with a similar name already exists')
             return render_template(
                 'propose_place.html',
                 form=form
             )
 
-        if Place.query.filter_by(address=place.address).first():
-            flash('Place with the same address already exists')
+        if Place.query.filter(
+            Place.address.like('%' + place.address + '%')
+                ).first():
+            flash('Place with a similar address already exists')
             return render_template(
                 'propose_place.html',
                 form=form
@@ -417,7 +422,7 @@ def propose_place():
         db.session.commit()
 
         flash(
-            'Event has been proposed. Wait for the approval from moderators',
+            'Place has been proposed. Wait for the approval from moderators',
             'success'
         )
         return redirect(url_for('places'))
