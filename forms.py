@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 from flask_wtf import FlaskForm
 from models import Place, Category, RoleEnum
+from utils import get_category_choices
+
 from wtforms import (
     StringField,
     DateTimeField,
@@ -100,10 +102,10 @@ class PlaceForm(FlaskForm):
 
 
 class CategoryForm(FlaskForm):
-    name = StringField('Category Name', validators=[DataRequired()])
-    description = StringField('Description')
-    parent_id = SelectField('Parent Category', coerce=int)
-    submit = SubmitField('Create Category')
+    name = StringField('Name', validators=[DataRequired()])
+    description = TextAreaField('Description')
+    parent_id = SelectField('Parent ID')
+    submit = SubmitField('Propose')
 
 
 class ReviewForm(FlaskForm):
@@ -150,7 +152,7 @@ class FilterForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(FilterForm, self).__init__(*args, **kwargs)
-        self.category.choices = [(c.id, c.name) for c in Category.query.all()]
+        self.category.choices = get_category_choices()
         self.place.choices = [(p.id, p.name) for p in Place.query.all()]
 
 

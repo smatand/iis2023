@@ -150,7 +150,7 @@ class Category(db.Model):
 
     parent_id = mapped_column(Integer, ForeignKey("category.id"))
     parent: Mapped[List["Category"]] = relationship(
-            "Category", remote_side=[id]
+            "Category", remote_side=[id], backref='children'
             )
 
     events: Mapped[List["Event"]] = relationship(

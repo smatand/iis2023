@@ -23,15 +23,17 @@ from forms import (
 from yaml import load, FullLoader
 from sqlalchemy import and_, or_
 from flask_bcrypt import Bcrypt
-from datetime import datetime
+from datetime import datetime as dt, timedelta
 import calendar
+from utils import get_category_choices
 from flask import (
     redirect,
     request,
     Flask,
     render_template,
     url_for,
-    flash
+    flash,
+    session
 )
 from flask_login import (
     LoginManager,
@@ -67,8 +69,8 @@ login_manager.init_app(app)
 
 
 def get_month_year():
-    year = request.args.get('year', default=datetime.now().year, type=int)
-    month = request.args.get('month', default=datetime.now().month, type=int)
+    year = request.args.get('year', default=dt.now().year, type=int)
+    month = request.args.get('month', default=dt.now().month, type=int)
     if month < 1:
         month = 12
         year -= 1
@@ -81,6 +83,14 @@ def get_month_year():
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
+
+
+# timeout for session
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=10)
+    session.modified = True
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -239,11 +249,16 @@ def logout():
 @login_required
 def create_event():
     form = EventForm()
+    form.category_ids.choices = get_category_choices()
+    # remove -----no parent category----
+    form.category_ids.choices.pop(0)
     if form.validate_on_submit():
         category_ids = [
             id for id, checked in zip([choice[0] for choice
                                        in form.category_ids.choices
                                        ], form.category_ids.data) if checked]
+        form.category_ids.choices = get_category_choices()
+
         place_id = form.place_id.data
 
         event = Event()
@@ -313,6 +328,9 @@ def edit_event(id):
         for category in categories:
             event.categories.append(category)
 
+        if event.approved is True:
+            flash('You cannot edit approved event!')
+            return redirect(url_for('event', id=id))
         db.session.commit()
 
         flash('Your event has been updated!', 'success')
@@ -352,7 +370,7 @@ def home():
 @app.route('/event/<int:id>', methods=['GET', 'POST'])
 def event(id):
     event = Event.query.get(id)
-    now = datetime.now()
+    now = dt.now()
     filled_capacity = len(event.users)
     form = ReviewForm()
     attend_form = EventAttendanceForm()
@@ -428,15 +446,17 @@ def propose_place():
         place.address = form.address.data
         place.description = form.description.data
 
-        if Place.query.filter_by(name=place.name).first():
-            flash('Place with the same name already exists')
+        if Place.query.filter(Place.name.like('%' + place.name + '%')).first():
+            flash('Place with a similar name already exists')
             return render_template(
                 'propose_place.html',
                 form=form
             )
 
-        if Place.query.filter_by(address=place.address).first():
-            flash('Place with the same address already exists')
+        if Place.query.filter(
+            Place.address.like('%' + place.address + '%')
+                ).first():
+            flash('Place with a similar address already exists')
             return render_template(
                 'propose_place.html',
                 form=form
@@ -446,7 +466,7 @@ def propose_place():
         db.session.commit()
 
         flash(
-            'Event has been proposed. Wait for the approval from moderators',
+            'Place has been proposed. Wait for the approval from moderators',
             'success'
         )
         return redirect(url_for('places'))
@@ -474,25 +494,34 @@ def categories():
 
 
 @app.route('/propose_category', methods=['GET', 'POST'])
-@login_required
 def propose_category():
     form = CategoryForm()
-    form.parent_id.choices = [(c.id, c.name) for c in Category.query.all()]
+    form.parent_id.choices = get_category_choices()
     if form.validate_on_submit():
-        category = Category()
-        category.name = form.name.data
-        category.description = form.description.data
-        category.parent_id = form.parent_id.data
+        parent_id = int(
+            form.parent_id.data
+            ) if form.parent_id.data != 'None' else None
+        category = Category(
+            name=form.name.data,
+            description=form.description.data,
+            parent_id=parent_id
+            )
+
+        if Category.query.filter(
+            Category.name.like('%' + category.name + '%'),
+                Category.parent_id == category.parent_id).first():
+            flash(
+                'Category with a similar name already exists under one parent'
+            )
+            return render_template(
+                'propose_category.html',
+                form=form
+            )
 
         db.session.add(category)
         db.session.commit()
-
-        flash(
-            'Category has been proposed, wait for approval',
-            'success'
-        )
-        return redirect(url_for('categories'))
-
+        flash('Your category proposal has been submitted.')
+        return redirect(url_for('index'))
     return render_template('propose_category.html', form=form)
 
 
