@@ -25,15 +25,6 @@ event_category_table = db.Table(
            primary_key=True)
 )
 
-event_user_table = db.Table(
-    'event_user',
-    Column('event_id', Integer, ForeignKey('event.id'),
-           primary_key=True),
-
-    Column('user_id', Integer, ForeignKey('user.id'),
-           primary_key=True)
-)
-
 event_admission_table = db.Table(
     'event_admission',
     Column('event_id', Integer, ForeignKey('event.id'),
@@ -43,6 +34,23 @@ event_admission_table = db.Table(
            primary_key=True)
 )
 
+class UserEvent(db.Model):
+    __tablename__="event_user"
+    event_id: Mapped[int] = mapped_column(ForeignKey("event.id"), primary_key = True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("user.id"), primary_key = True)
+
+    user: Mapped["User"] = relationship(back_populates="events_association")
+    event: Mapped["Event"] = relationship(back_populates="users_association")
+    
+    admission: Mapped[int] = mapped_column(Integer, nullable=True)
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete_item(self):
+        db.session.delete(self)
+        db.session.commit()
 
 class RoleEnum(enum.Enum):
     user = 1
@@ -57,9 +65,9 @@ class User(UserMixin, db.Model):
     password: Mapped[str] = mapped_column(String, nullable=False)
     role: Mapped[RoleEnum] = mapped_column(Enum(RoleEnum), nullable=False)
 
-    events: Mapped[List["Event"]] = relationship(
-        secondary="event_user",
-        back_populates="users"
+    events: Mapped[List["Event"]] = relationship (secondary="event_user", back_populates="users", viewonly=True)
+    events_association: Mapped[List["UserEvent"]] = relationship(
+        back_populates="user"
     )
 
     owned_events: Mapped[List["Event"]] = relationship(back_populates="owner")
@@ -108,7 +116,7 @@ class Event(db.Model):
     description: Mapped[str] = mapped_column(String, nullable=True)
     image: Mapped[str] = mapped_column(String, nullable=True)
 
-    approved: Mapped[bool] = mapped_column(Boolean, default=False)
+    approved: Mapped[bool] = mapped_column(Boolean, default=False, nullable=True)
 
     owner: Mapped["User"] = relationship(back_populates="owned_events")
     owner_id: Mapped[int] = mapped_column(ForeignKey("user.id"))
@@ -116,9 +124,10 @@ class Event(db.Model):
     place: Mapped["Place"] = relationship(back_populates="events")
     place_id: Mapped[int] = mapped_column(ForeignKey("place.id"))
 
-    users: Mapped[List["User"]] = relationship(
-        secondary="event_user",
-        back_populates="events"
+
+    users: Mapped[List["User"]] = relationship (secondary="event_user", back_populates="events", viewonly=True)
+    users_association: Mapped[List["UserEvent"]] = relationship(
+        back_populates="event"
     )
 
     categories: Mapped[List["Category"]] = relationship(

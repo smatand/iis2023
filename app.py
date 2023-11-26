@@ -5,7 +5,8 @@ from models import (
     Event,
     Place,
     Category,
-    Review
+    Review,
+    UserEvent
 )
 from forms import (
     EventForm,
@@ -43,6 +44,9 @@ from flask_login import (
     current_user
 )
 
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+
 with open("config.yaml") as f:
     cfg = load(f, Loader=FullLoader)
 
@@ -55,6 +59,7 @@ database = cfg["database"]["name"]
 
 
 app = Flask(__name__)
+migrate = Migrate(app, db)
 
 app.config.update(
     SQLALCHEMY_DATABASE_URI=(
@@ -407,9 +412,9 @@ def event(id):
             if filled_capacity == event.capacity:
                 flash('Sorry, this event is full')
                 return redirect(url_for('event', id=id))
-
-            event.users.append(current_user)
-            db.session.commit()
+            
+            user_event = UserEvent(event_id = event.id, user_id=current_user.id)
+            user_event.insert()
             return redirect(url_for('event', id=id))
 
         elif cancel_attend_form.validate_on_submit():
@@ -419,7 +424,8 @@ def event(id):
                     return redirect(url_for('event', id=id))
 
                 event.users.remove(current_user)
-                db.session.commit()
+                user_event = db.session.execute(db.select(UserEvent).filter_by(user_id=current_user.id, event_id=event.id)).scalar_one()
+                user_event.delete_item()
                 return redirect(url_for('event', id=id))
 
     # don't show unapproved events to users who are not owners
