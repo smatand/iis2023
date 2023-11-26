@@ -60,6 +60,9 @@
             <ul class="nav-menu">
                 <li><button class="nav-button" onclick="window.location.href='{{ url_for('index') }}';">Events</button></li>
                 {% if current_user.is_authenticated %}
+                {% if current_user.role.value == 3 %}
+                <li><button class="nav-button" onclick="window.location.href='{{ url_for('users') }}';">Users</button></li>
+                {% endif %}
                 <li><button class="nav-button" onclick="window.location.href='{{ url_for('places') }}';">Places</button></li>
                 <li><button class="nav-button" onclick="window.location.href='{{ url_for('categories') }}';">Categories</button></li>
                 <li><button class="nav-button-my" onclick="window.location.href='{{ url_for('home') }}';">My calendar</button></li>

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header>
+</header>
+
+<main>
+	<h2 class="place-name">{{ user.name }}</h2>
+	<p class="place-description">{{ user.role.name }}</p>
+	<form method="POST">
+		{{ form.csrf_token }}
+		{{ form.role.label }} {{ form.role() }}
+		{{ form.submit }}
+	</form>
+</main>
+{% endblock %}
