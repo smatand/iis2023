@@ -83,6 +83,8 @@ class Place(db.Model):
     address: Mapped[str] = mapped_column(String, nullable=False, unique=True)
     description: Mapped[str] = mapped_column(String, nullable=True)
 
+    approved: Mapped[bool] = mapped_column(Boolean, default=False)
+
     events: Mapped[List["Event"]] = relationship(back_populates="place")
 
     def get_detail(id: int):
@@ -145,8 +147,10 @@ class Event(db.Model):
 class Category(db.Model):
     __tablename__ = "category"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String, nullable=True)
+    name: Mapped[str] = mapped_column(String, nullable=True, unique=True)
     description: Mapped[str] = mapped_column(String, nullable=True)
+
+    approved: Mapped[bool] = mapped_column(Boolean, default=False)
 
     parent_id = mapped_column(Integer, ForeignKey("category.id"))
     parent: Mapped[List["Category"]] = relationship(
