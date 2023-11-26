@@ -134,7 +134,7 @@ def index():
 @app.route("/users", methods=['GET', 'POST'])
 @login_required
 def users():
-    if current_user.role.value < 3:
+    if current_user.role.value < RoleEnum.administrator.value:
         return redirect(url_for('index'))
     
     users = User.query.all()
@@ -150,6 +150,9 @@ def users():
 @app.route("/edit_user/<int:id>", methods=['GET', 'POST'])
 @login_required
 def edit_user(id):
+    if current_user.role.value < RoleEnum.administrator.value:
+        return redirect(url_for('index'))
+    
     user = User.query.get_or_404(id)
     form = UserUpdateForm()
 
