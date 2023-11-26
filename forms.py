@@ -129,6 +129,10 @@ class EventAttendanceCancelForm(FlaskForm):
     submit = SubmitField('Cancel attend')
 
 
+class EventApprovalForm(FlaskForm):
+    submit = SubmitField('Approve')
+
+
 class DeleteReviewForm(FlaskForm):
     submit = SubmitField('Delete review')
 
