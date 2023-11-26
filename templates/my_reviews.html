@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <header>
+        <h1>My reviews</h1>
+    </header>
+
+    <main>
+        <ul class="place-list">
+            {% for review in reviews %}
+                <li class="place-item">
+                    <div class="review-content">
+                        <button class="event" onclick="window.location.href='{{ url_for('event', id=review.event.id) }}';">{{ review.event.name }}</button>
+                        <p class="place-description">{{ review.comment }}</p>
+                        <p class="place-description">Rating: {{ review.rating }} / 10</p>
+                    </div>
+                    <form method="POST" class="delete-form">
+                        {{ form.hidden_tag() }}
+                        <input type="hidden" name="review_id" value="{{ review.id }}">
+                        {{ form.submit(class="delete-button") }}
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    </main>
+{% endblock %}
