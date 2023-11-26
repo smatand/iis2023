@@ -23,6 +23,7 @@ from sqlalchemy import and_, or_
 from flask_bcrypt import Bcrypt
 from datetime import datetime as dt, timedelta
 import calendar
+from utils import get_category_choices
 from flask import (
     redirect,
     request,
@@ -461,21 +462,6 @@ def categories():
         'categories.html',
         categories=categories,
         events=events)
-
-
-def get_category_choices():
-    categories = Category.query.all()
-
-    def get_category_tree(category, prefix=''):
-        choices = [(category.id, prefix + category.name)]
-        for subcategory in category.children:
-            choices.extend(get_category_tree(subcategory, prefix + '-'))
-        return choices
-    choices = [(None, '-----no parent category----')]
-    for category in categories:
-        if category.parent is None:
-            choices.extend(get_category_tree(category))
-    return choices
 
 
 @app.route('/propose_category', methods=['GET', 'POST'])

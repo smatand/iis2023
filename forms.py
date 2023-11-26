@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from flask_wtf import FlaskForm
 from models import Place, Category
+from utils import get_category_choices
 from wtforms import (
     StringField,
     DateTimeField,
@@ -150,5 +151,5 @@ class FilterForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(FilterForm, self).__init__(*args, **kwargs)
-        self.category.choices = [(c.id, c.name) for c in Category.query.all()]
+        self.category.choices = get_category_choices()
         self.place.choices = [(p.id, p.name) for p in Place.query.all()]
