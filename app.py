@@ -21,7 +21,7 @@ from forms import (
 from yaml import load, FullLoader
 from sqlalchemy import and_, or_
 from flask_bcrypt import Bcrypt
-from datetime import datetime
+from datetime import datetime as dt, timedelta
 import calendar
 from flask import (
     redirect,
@@ -29,7 +29,8 @@ from flask import (
     Flask,
     render_template,
     url_for,
-    flash
+    flash,
+    session
 )
 from flask_login import (
     LoginManager,
@@ -65,8 +66,8 @@ login_manager.init_app(app)
 
 
 def get_month_year():
-    year = request.args.get('year', default=datetime.now().year, type=int)
-    month = request.args.get('month', default=datetime.now().month, type=int)
+    year = request.args.get('year', default=dt.now().year, type=int)
+    month = request.args.get('month', default=dt.now().month, type=int)
     if month < 1:
         month = 12
         year -= 1
@@ -79,6 +80,13 @@ def get_month_year():
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
+
+
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=5)
+    session.modified = True
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -326,7 +334,7 @@ def home():
 @app.route('/event/<int:id>', methods=['GET', 'POST'])
 def event(id):
     event = Event.query.get(id)
-    now = datetime.now()
+    now = dt.now()
     filled_capacity = len(event.users)
     form = ReviewForm()
     attend_form = EventAttendanceForm()
