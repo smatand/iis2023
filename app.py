@@ -1,5 +1,5 @@
 from models import User, RoleEnum, db, Event, Place, Category, Review
-from forms import EventForm, PlaceForm, CategoryForm, ReviewForm, FilterForm, EventAttendanceForm, EventAttendanceCancelForm
+from forms import EventForm, PlaceForm, CategoryForm, ReviewForm, FilterForm, EventAttendanceForm, EventAttendanceCancelForm, DeleteReviewForm
 from yaml import load, FullLoader
 from sqlalchemy import and_, or_
 from flask_bcrypt import Bcrypt
@@ -395,3 +395,28 @@ def propose_category():
         return redirect(url_for('categories'))
 
     return render_template('propose_category.html', form=form)
+
+
+@app.route('/my_reviews', methods=['GET', 'POST'])
+@login_required
+def my_reviews():
+    my_reviews = User.query.get(current_user.id).reviews
+    form = DeleteReviewForm()
+
+    if form.validate_on_submit():
+        review_id = request.form.get('review_id')
+        review = Review.query.get(review_id)
+        if review.user_id != current_user.id:
+            flash('You can delete only your own reviews')
+            return redirect(url_for('home'))
+
+        db.session.delete(review)
+        db.session.commit()
+        flash('Your review has been deleted!', 'success')
+        return redirect(url_for('my_reviews'))
+
+    return render_template(
+        'my_reviews.html',
+        reviews=my_reviews,
+        form=form
+    )

@@ -55,7 +55,7 @@ thead td:hover {
 }
 
 .button-log {
-    background-color: #dd5a5a;
+    background-color: #ff0000;
     border: none;
     color: white;
     padding: 15px 32px;
@@ -66,9 +66,12 @@ thead td:hover {
     margin: 4px 2px;
     cursor: pointer;
     margin-left: max;
+    border-radius: 12px;
 }
 .button-log:hover {
-    background-color: #DD0000;
+    background-color: #ffcc00;
+    color: black;
+    border-radius: 12px;
 }
 .nav-menu {
     display: flex;
@@ -78,11 +81,31 @@ thead td:hover {
 }
 .nav-button {
     display: block;
+    border-radius: 12px;
 }
-.username-display {
-    background-color: rgb(44, 42, 42);
+.nav-button:hover {
+    display: block;
+    border-radius: 12px;
+    background-color: grey;
+}
+.nav-button-my {
+    background-color: black;
     color: white;
     border-radius: 12px;
+    display: block;
+}
+.nav-button-my:hover {
+    background-color: gray;
+    color: white;
+    border-radius: 12px;
+    display: block;
+}
+.username-display {
+    background-color: rgb(255, 255, 255);
+    color: rgb(0, 0, 0);
+    border-radius: 12px;
+    border-color: black;
+    border-style: double;
     padding: 15px 32px; 
     margin-left: auto;
     cursor: default;
@@ -91,16 +114,3 @@ thead td:hover {
     text-align: center;
     line-height: 1.5;
 }
-.username-display:hover {
-    background-color: black;
-    color: white;
-    border-radius: 12px;
-    padding: 15px 32px;
-    margin-left: auto;
-    cursor: default;
-    font-size: 1.2em;
-    font-weight: bold;
-    text-align: center;
-    line-height: 1.5;
-}
-

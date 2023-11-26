@@ -92,6 +92,10 @@ class EventAttendanceCancelForm(FlaskForm):
     submit = SubmitField('Cancel attend')
 
 
+class DeleteReviewForm(FlaskForm):
+    submit = SubmitField('Delete review')
+
+
 class FilterForm(FlaskForm):
     name = StringField('Name', validators=[Optional()])
     category = SelectMultipleField(

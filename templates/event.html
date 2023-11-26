@@ -29,13 +29,11 @@
         <form method="POST">
             {{ attend_form.hidden_tag() }}
              <button type="submit" name="attend" class="button-log">Attend</button>
-            <!--{{ attend_form.submit(class="button-log")}}-->
         </form>
     {% elif current_user.is_authenticated and event.start_datetime > now and current_user in event.users and event.approved %}
         <form method="POST">
             {{ cancel_attend_form.hidden_tag() }}
              <button type="submit" name="cancel_attend" class="button-log">Cancel attend</button>
-            <!--{{ cancel_attend_form.submit(class="button-log")}}-->
         </form>
     {% endif %}
 
@@ -50,7 +48,7 @@
             </div>
         {% endfor %}
     </div>
-    {% if current_user in event.users and event.end_datetime > now %}
+    {% if current_user in event.users and event.end_datetime < now %}
         <h3>Submit a Review</h3>
         <div class="review_form">
             <form method="POST">
@@ -61,7 +59,7 @@
                 <div>
                     {{ form.rating.label }} {{ form.rating(class="form-control") }}
                 </div>
-                <button type="submit_review" class="btn btn-primary">Submit</button>
+                <button type="submit" name="submit_review" class="btn btn-primary">Submit</button>
             </form>
         </div>
     {% endif %}
