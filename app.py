@@ -70,16 +70,29 @@ def index():
         name = form.name.data
         category_ids = form.category.data
         place_ids = form.place.data
+        approved = form.approved.data
 
-        events = Event.query.filter(and_(
-            Event.name.ilike('%{}%'.format(name)),
-            or_(*[Event.categories.any(
-                id=category_id
-                ) for category_id in category_ids]),
-            or_(*[Event.place.has(
-                id=place_id
-                ) for place_id in place_ids])
-        )).all()
+        if approved is False:
+            events = Event.query.filter(and_(
+                Event.name.ilike('%{}%'.format(name)),
+                or_(*[Event.categories.any(
+                    id=category_id
+                    ) for category_id in category_ids]),
+                or_(*[Event.place.has(
+                    id=place_id
+                    ) for place_id in place_ids]),
+            )).all()
+        else:
+            events = Event.query.filter(and_(
+                Event.name.ilike('%{}%'.format(name)),
+                or_(Event.approved.is_(True)),
+                or_(*[Event.categories.any(
+                    id=category_id
+                    ) for category_id in category_ids]),
+                or_(*[Event.place.has(
+                    id=place_id
+                    ) for place_id in place_ids])
+            )).all()
     else:
         events = Event.query.all()
 
@@ -180,7 +193,6 @@ def logout():
 def create_event():
     form = EventForm()
     if form.validate_on_submit():
-        name = form.name.data
         category_ids = [
             id for id, checked in zip([choice[0] for choice
                                        in form.category_ids.choices
@@ -188,7 +200,7 @@ def create_event():
         place_id = form.place_id.data
 
         event = Event()
-        event.name = name
+        event.name = form.name.data
         event.start_datetime = form.start_datetime.data
         event.end_datetime = form.end_datetime.data
         event.capacity = form.capacity.data
@@ -196,6 +208,7 @@ def create_event():
         event.image = form.image.data
         event.place_id = place_id
         event.users.append(current_user)
+        event.owner_id = current_user.id
 
         categories = Category.query.filter(Category.id.in_(category_ids)).all()
         for category in categories:
@@ -243,7 +256,7 @@ def home():
 
 @app.route('/event/<int:id>', methods=['GET', 'POST'])
 def event(id):
-    event = Event.get_detail(id)
+    event = Event.query.get(id)
     now = datetime.now()
     form = ReviewForm()
     if form.validate_on_submit():

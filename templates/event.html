@@ -21,7 +21,7 @@
             <img class="event_image" src="{{ event.image }}" alt="Event Image">
         {% endif %}
     </div>
-    {% if current_user.is_authenticated and event.start_datetime > now %}
+    {% if current_user.is_authenticated and event.start_datetime > now and current_user.id != event.owner_id and current_user not in event.users %}
         <div class="entry_request">
             <button class="button-log">Request for entry</button>
             <p>Note: A fee may be required for admission!</p>
@@ -38,7 +38,7 @@
             </div>
         {% endfor %}
     </div>
-    {% if current_user in event.users %}
+    {% if current_user in event.users and event.end_datetime < now %}
         <h3>Submit a Review</h3>
         <div class="review_form">
             <form method="POST">

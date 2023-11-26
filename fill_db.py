@@ -86,7 +86,6 @@ if __name__ == "__main__":
             format="%Y-%m-%d %H:%M:%S"
             )
     end = datetime.now().strftime(format="%Y-%m-%d %H:%M:%S")
-
     iis = Event(
             name="IIS",
             start_datetime=start,
@@ -94,7 +93,8 @@ if __name__ == "__main__":
             capacity=150,
             description="IIS lecture",
             image="https://blog.viettelcybersecurity.com/content/images/2022/07/Windows-IIS-1.png",  # noqa
-            place_id=1
+            place_id=1,
+            owner_id=1
             )
 
     isa = Event(
@@ -104,9 +104,10 @@ if __name__ == "__main__":
             capacity=150,
             description="ISA lecture",
             image="https://upload.wikimedia.org/wikipedia/commons/3/36/Isa1.jpg",  # noqa
-            place_id=2
-            )
-
+            place_id=2,
+            owner_id=2,
+            approved=True
+    )
     iis_review = Review(
             comment="best lecture ever",
             rating=10,
