@@ -1,5 +1,23 @@
-from models import User, RoleEnum, db, Event, Place, Category, Review
-from forms import EventForm, PlaceForm, CategoryForm, ReviewForm, FilterForm, EventAttendanceForm, EventAttendanceCancelForm, DeleteReviewForm, EditEventForm
+from models import (
+    User,
+    RoleEnum,
+    db,
+    Event,
+    Place,
+    Category,
+    Review
+)
+from forms import (
+    EventForm,
+    PlaceForm,
+    CategoryForm,
+    ReviewForm,
+    FilterForm,
+    EventAttendanceForm,
+    EventAttendanceCancelForm,
+    DeleteReviewForm,
+    EditEventForm
+)
 from yaml import load, FullLoader
 from sqlalchemy import and_, or_
 from flask_bcrypt import Bcrypt
@@ -347,18 +365,21 @@ def event(id):
             db.session.commit()
             return redirect(url_for('event', id=id))
 
-        elif cancel_attend_form.validate_on_submit() and 'cancel_attend' in request.form:
-            if current_user not in event.users:
-                flash('You are not a participant of this event')
-                return redirect(url_for('event', id=id))
+        elif cancel_attend_form.validate_on_submit():
+            if 'cancel_attend' in request.form:
+                if current_user not in event.users:
+                    flash('You are not a participant of this event')
+                    return redirect(url_for('event', id=id))
 
-            event.users.remove(current_user)
-            db.session.commit()
-            return redirect(url_for('event', id=id))
+                event.users.remove(current_user)
+                db.session.commit()
+                return redirect(url_for('event', id=id))
 
     # don't show unapproved events to users who are not owners
     if not event.approved and event.owner_id != current_user.id:
-        flash('You cannot see details of unapproved event, that has not been created by you!')
+        flash(
+            'You cannot see details of unapproved event, '
+            'that has not been created by you!')
         return redirect(url_for('index'))
 
     return render_template('event.html', event=event, now=now, form=form,
