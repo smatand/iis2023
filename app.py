@@ -219,11 +219,16 @@ def logout():
 @login_required
 def create_event():
     form = EventForm()
+    form.category_ids.choices = get_category_choices()
+    # remove -----no parent category----
+    form.category_ids.choices.pop(0)
     if form.validate_on_submit():
         category_ids = [
             id for id, checked in zip([choice[0] for choice
                                        in form.category_ids.choices
                                        ], form.category_ids.data) if checked]
+        form.category_ids.choices = get_category_choices()
+
         place_id = form.place_id.data
 
         event = Event()
