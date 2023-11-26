@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<header>
+	<h1>Users</h1>
+	<div style="display: flex; justify-content: center;">
+		<form method="POST" action="/users">
+			{{ form.csrf_token }}
+			{{ form.search.label }} {{ form.search(size=20) }} {{ form.submit }}
+		</form>
+	</div>
+</header>
+
+<main>
+	<ul class="place-list">
+		{% for user in users %}
+		<li class="place-item">
+			<h2 class="place-name">{{ user.name }}</h2>
+			<p class="place-description">{{ user.role.name }}</p>
+			<button class="event-unapproved" onclick="window.location.href='{{ url_for('edit_user', id=user.id) }}';">Edit role</button>
+		</li>
+		{% endfor %}
+	</ul>
+</main>
+{% endblock %}
