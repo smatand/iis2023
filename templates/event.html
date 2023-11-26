@@ -13,7 +13,11 @@
         <div class="detail"><strong>Capacity:</strong> <span>{{ filled_capacity }} / {{ event.capacity }}</span></div>
         <div class="detail-cat"><strong>Categories:</strong>
             {% for category in event.categories %}
+            {% if category.parent %}
+            <div class="event-categories-tag">{{ category.parent.name }} -> {{ category.name }}</div>
+            {% else %}
             <div class="event-categories-tag">{{ category.name }}</div>
+            {% endif %}
             {% endfor %}
         </div>
         <div class="detail-cat"><strong>Place:</strong>
@@ -39,6 +43,7 @@
         <button type="submit" name="attend" class="button-log">Attend</button>
     </form>
     {% else %}
+    <h3>You are signed in as a visitor of this event</h3>
     <form method="POST">
         {{ cancel_attend_form.hidden_tag() }}
         <button type="submit" name="cancel_attend" class="button-log">Cancel attend</button>
