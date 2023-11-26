@@ -31,9 +31,11 @@
                 <div class="day-number">{{ day }}</div>
                 {% for event in events %}
                     {% if event.start_datetime.day <= day and event.end_datetime.day >= day and event.start_datetime.month == month and event.start_datetime.year == year %}
+                    {% if event.approved %}
                     <button class="event" onclick="window.location.href='{{ url_for('event', id=event.id) }}';">
                         {{ event.name }}
                     </button>
+                    {% endif %}
                     {% endif %}
                 {% endfor %}
                 {% endif %}

@@ -84,6 +84,14 @@ class ReviewForm(FlaskForm):
     submit = SubmitField('Submit Review')
 
 
+class EventAttendanceForm(FlaskForm):
+    submit = SubmitField('Attend')
+
+
+class EventAttendanceCancelForm(FlaskForm):
+    submit = SubmitField('Cancel attend')
+
+
 class FilterForm(FlaskForm):
     name = StringField('Name', validators=[Optional()])
     category = SelectMultipleField(

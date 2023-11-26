@@ -4,6 +4,7 @@ from sqlalchemy.orm import DeclarativeBase
 from models import User, Category, Event, Place, Review, Admission, RoleEnum
 from datetime import datetime, timedelta
 from yaml import load, FullLoader
+from app import bcrypt
 
 with open("config.yaml") as f:
     cfg = load(f, Loader=FullLoader)
@@ -58,27 +59,30 @@ if __name__ == "__main__":
             parent_id=1
             )
 
+    password = bcrypt.generate_password_hash("user1").decode('utf-8')
     user1 = User(
             name="user1",
-            password="user1",
+            password=password,
             role=RoleEnum.user
             )
 
+    password = bcrypt.generate_password_hash("user2").decode('utf-8')
     user2 = User(
             name="user2",
-            password="user2",
+            password=password,
             role=RoleEnum.user
             )
 
+    password = bcrypt.generate_password_hash("mod").decode('utf-8')
     mod = User(
             name="mod",
-            password="mod",
+            password=password,
             role=RoleEnum.moderator
             )
-
+    password = bcrypt.generate_password_hash("admin").decode('utf-8')
     admin = User(
             name="admon",
-            password="admin",
+            password=password,
             role=RoleEnum.administrator
             )
 

@@ -52,7 +52,7 @@
                       {% if event.start_datetime.day <= day and event.end_datetime.day >= day and event.start_datetime.month == month and event.start_datetime.year == year %}
                         {% if event.approved == true %}
                             <button class="event" onclick="window.location.href='{{ url_for('event', id=event.id) }}';">{{ event.name }}</button>
-                        {% else %}
+                        {% elif event.approved == false and event.owner_id == current_user.id %}
                             <button class="event-unapproved" onclick="window.location.href='{{ url_for('event', id=event.id) }}';">{{ event.name }}</button>
                         {% endif %}
                       {% endif %}
@@ -79,12 +79,25 @@
         </thead>
         <tbody>
             {% for event in events %}
-                <tr class="event-table-row">
-                    {% if event.approved == false %}
+                {% if event.approved == false and event.owner_id == current_user.id %}
+                    <tr class="event-table-row">
                         <td class="event-table-data"><button class="event-unapproved" onclick="window.location.href='{{ url_for('event', id=event.id) }}';">{{ event.name }}  (unapproved)</button></td>
-                    {% else %}
-                        <td class="event-table-data"><button class="event" onclick="window.location.href='{{ url_for('event', id=event.id) }}';">{{ event.name }}</button></td>
-                    {% endif %}
+                        <td class="event-table-data">{{ event.owner.name }}</td>
+                        <td class="event-table-data">{{ event.start_datetime }}</td>
+                        <td class="event-table-data">{{ event.end_datetime }}</td>
+                        <td class="event-table-data">
+                        {% for category in event.categories %}
+                            <div class="event-categories-tag">{{ category.name }}</div>
+                        {% endfor %}
+                        </td>
+                        <td class="event-table-data">
+                                <div class="event-places-tag">{{ event.place.name }}</div>
+                        </td>
+
+                    </tr>
+                {% elif event.approved == true %}
+                <tr class="event-table-row">
+                    <td class="event-table-data"><button class="event" onclick="window.location.href='{{ url_for('event', id=event.id) }}';">{{ event.name }}</button></td>
                     <td class="event-table-data">{{ event.owner.name }}</td>
                     <td class="event-table-data">{{ event.start_datetime }}</td>
                     <td class="event-table-data">{{ event.end_datetime }}</td>
@@ -98,6 +111,7 @@
                     </td>
                     
                 </tr>
+                {% endif %}
             {% endfor %}
         </tbody>
     </table>
