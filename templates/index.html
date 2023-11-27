@@ -1,71 +1,77 @@
 {% extends "base.html" %}
 {% block content %}
-    <header>
+<header>
     <h1>Overview</h1>
     <h3>Welcome, {% if current_user.is_authenticated %}{{ current_user.name }}{% else %}guest{% endif %}!</h3>
     {% if current_user.is_authenticated %}
     <div style="display: flex; justify-content: center;">
-    <button class="nav-button-2" onclick="window.location.href='{{ url_for('create_event') }}';">Create a new event</button>
+        <button class="nav-button-2" onclick="window.location.href='{{ url_for('create_event') }}';">Create a new
+            event</button>
     </div>
     {% endif %}
-    </header>
+</header>
 <form method="POST" class="filter-form">
-        {{ form.hidden_tag() }}
-        <label for="name">Name:</label>
-        {{ form.name(id='name', class='form-input') }}
-        <label for="category">Category:</label>
-        {{ form.category(id='category', class='form-input') }}
-        <label for="place">Place:</label>
-        {{ form.place(id='place', class='form-input') }}
-        <label for="approved">Only approved:</label>
-        {{ form.approved(id='approved', class='form-input') }}
+    {{ form.hidden_tag() }}
+    <label for="name">Name:</label>
+    {{ form.name(id='name', class='form-input') }}
+    <label for="category">Category:</label>
+    {{ form.category(id='category', class='form-input') }}
+    <label for="place">Place:</label>
+    {{ form.place(id='place', class='form-input') }}
+    {% if current_user.is_authenticated %}
+    <label for="approved">Only approved:</label>
+    {{ form.approved(id='approved', class='form-input') }}
+    {% endif %}
+    <input type="submit" value="Filter" class="form-submit">
+</form>
 
-
-        <input type="submit" value="Filter" class="form-submit">
-    </form>
-
-    <div style="display: flex; justify-content: space-between;">
-          <button onclick="window.location.href='{{ url_for('index', year=year, month=month-1) }}';">Previous Month</button>
-          <p id="current-month" class="month-display">Events at {{ month_name }} {{ year }}</p>
-          <button onclick="window.location.href='{{ url_for('index', year=year, month=month+1) }}';">Next Month</button>
-    </div>
-    <table>
-        <thead>
-            <tr>
-              <td>Monday</td>
-              <td>Tuesday</td>
-              <td>Wednesday</td>
-              <td>Thursday</td>
-              <td>Friday</td>
-              <td>Saturday</td>
-              <td>Sunday</td>
-            </tr>
-            </thead>
-        {% for week in calendar.monthcalendar(year, month) %}
+<div style="display: flex; justify-content: space-between;">
+    <button onclick="window.location.href='{{ url_for('index', year=year, month=month-1) }}';">Previous Month</button>
+    <p id="current-month" class="month-display">Events at {{ month_name }} {{ year }}</p>
+    <button onclick="window.location.href='{{ url_for('index', year=year, month=month+1) }}';">Next Month</button>
+</div>
+<table>
+    <thead>
         <tr>
-          {% for day in week %}
-          <td>
-              <div class="day">
-                  {% if day != 0 %}
-                  <div class="day-number">{{ day }}</div>
-                  {% for event in events %}
-                      {% if event.start_datetime.day <= day and event.end_datetime.day >= day and event.start_datetime.month == month and event.start_datetime.year == year %}
-                        {% if event.approved == true %}
-                            <button class="event" onclick="window.location.href='{{ url_for('event', id=event.id) }}';">{{ event.name }}</button>
-                        {% elif event.approved == false and event.owner_id == current_user.id %}
-                            <button class="event-unapproved" onclick="window.location.href='{{ url_for('event', id=event.id) }}';">{{ event.name }}</button>
-                        {% endif %}
-                      {% endif %}
-                  {% endfor %}
-                  {% endif %}
-              </div>
-          </td>
-          {% endfor %}
-      </tr>
-      {% endfor %}
+            <td>Monday</td>
+            <td>Tuesday</td>
+            <td>Wednesday</td>
+            <td>Thursday</td>
+            <td>Friday</td>
+            <td>Saturday</td>
+            <td>Sunday</td>
+        </tr>
+    </thead>
+    {% for week in calendar.monthcalendar(year, month) %}
+    <tr>
+        {% for day in week %}
+        <td>
+            <div class="day">
+                {% if day != 0 %}
+                <div class="day-number">{{ day }}</div>
+                {% for event in events %}
+                {% if event.start_datetime.day <= day and event.end_datetime.day>= day and event.start_datetime.month ==
+                    month and event.start_datetime.year == year %}
+                    {% if event.approved == true %}
+                    <button class="event" onclick="window.location.href='{{ url_for('event', id=event.id) }}';">{{
+                        event.name }}</button>
+                    {% elif event.approved == false and current_user.is_authenticated %}
+                        {% if event.owner_id == current_user.id or current_user.role.value > 1 %}
+                        <button class="event-unapproved"
+                            onclick="window.location.href='{{ url_for('event', id=event.id) }}';">{{ event.name }}</button>
+                        {% endif %}    
+                    {% endif %}
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+            </div>
+        </td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
 </table>
 <div id="event-list">
-    <h2>All approved events</h2>
+    <h2>List of events</h2>
     <table class="event-table">
         <thead>
             <tr>
@@ -79,39 +85,69 @@
         </thead>
         <tbody>
             {% for event in events %}
-                {% if event.approved == false and event.owner_id == current_user.id %}
-                    <tr class="event-table-row">
-                        <td class="event-table-data"><button class="event-unapproved" onclick="window.location.href='{{ url_for('event', id=event.id) }}';">{{ event.name }}  (unapproved)</button></td>
-                        <td class="event-table-data">{{ event.owner.name }}</td>
-                        <td class="event-table-data">{{ event.start_datetime }}</td>
-                        <td class="event-table-data">{{ event.end_datetime }}</td>
-                        <td class="event-table-data">
-                        {% for category in event.categories %}
-                            <div class="event-categories-tag">{{ category.name }}</div>
-                        {% endfor %}
-                        </td>
-                        <td class="event-table-data">
-                                <div class="event-places-tag">{{ event.place.name }}</div>
-                        </td>
-
-                    </tr>
-                {% elif event.approved == true %}
+            {% if current_user.is_authenticated %}
+                {% if event.approved == false and (event.owner_id == current_user.id or current_user.role.value > 1) %}
                 <tr class="event-table-row">
-                    <td class="event-table-data"><button class="event" onclick="window.location.href='{{ url_for('event', id=event.id) }}';">{{ event.name }}</button></td>
+                    <td class="event-table-data"><button class="event-unapproved"
+                            onclick="window.location.href='{{ url_for('event', id=event.id) }}';">{{ event.name }}
+                            (unapproved)</button></td>
                     <td class="event-table-data">{{ event.owner.name }}</td>
                     <td class="event-table-data">{{ event.start_datetime }}</td>
                     <td class="event-table-data">{{ event.end_datetime }}</td>
                     <td class="event-table-data">
-                    {% for category in event.categories %}
+                        {% for category in event.categories %}
+                        {% if category.parent %}
+                        <div class="event-categories-tag">{{ category.parent.name }} -> {{ category.name }}</div>
+                        {% else %}
                         <div class="event-categories-tag">{{ category.name }}</div>
-                    {% endfor %}
+                        {% endif %}
+                        {% endfor %}
                     </td>
                     <td class="event-table-data">
-                            <div class="event-places-tag">{{ event.place.name }}</div>
+                        <div class="event-places-tag">{{ event.place.name }}</div>
                     </td>
-                    
+
+                </tr>
+                {% elif event.approved == true %}
+                <tr class="event-table-row">
+                    <td class="event-table-data"><button class="event"
+                            onclick="window.location.href='{{ url_for('event', id=event.id) }}';">{{ event.name }}</button>
+                    </td>
+                    <td class="event-table-data">{{ event.owner.name }}</td>
+                    <td class="event-table-data">{{ event.start_datetime }}</td>
+                    <td class="event-table-data">{{ event.end_datetime }}</td>
+                    <td class="event-table-data">
+                        {% for category in event.categories %}
+                        <div class="event-categories-tag">{{ category.name }}</div>
+                        {% endfor %}
+                    </td>
+                    <td class="event-table-data">
+                        <div class="event-places-tag">{{ event.place.name }}</div>
+                    </td>
+
                 </tr>
                 {% endif %}
+            {% else %}
+                {% if event.approved == true %}
+                <tr class="event-table-row">
+                    <td class="event-table-data"><button class="event"
+                            onclick="window.location.href='{{ url_for('event', id=event.id) }}';">{{ event.name }}</button>
+                    </td>
+                    <td class="event-table-data">{{ event.owner.name }}</td>
+                    <td class="event-table-data">{{ event.start_datetime }}</td>
+                    <td class="event-table-data">{{ event.end_datetime }}</td>
+                    <td class="event-table-data">
+                        {% for category in event.categories %}
+                        <div class="event-categories-tag">{{ category.name }}</div>
+                        {% endfor %}
+                    </td>
+                    <td class="event-table-data">
+                        <div class="event-places-tag">{{ event.place.name }}</div>
+                    </td>
+
+                </tr>
+                {% endif %}
+            {% endif %}
             {% endfor %}
         </tbody>
     </table>

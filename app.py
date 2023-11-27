@@ -282,7 +282,7 @@ def edit_event(id):
         flash('This is not your event to edit!')
 
     if event.approved is True:
-        flash('You cannot edit approved event!')
+        flash('You cannot edit approved events!')
         return redirect(url_for('event', id=id))
 
     form = EditEventForm()
@@ -352,6 +352,7 @@ def event(id):
     form = ReviewForm()
     attend_form = EventAttendanceForm()
     cancel_attend_form = EventAttendanceCancelForm()
+    approval_form = EventApprovalForm()
 
     if request.method == 'POST':
 
@@ -392,6 +393,10 @@ def event(id):
             user_event.insert()
             return redirect(url_for('event', id=id))
 
+        elif attend_form.validate_on_submit() and 'approve' in request.form:
+            event.approved = True
+            db.session.commit()
+
         elif cancel_attend_form.validate_on_submit():
             if 'cancel_attend' in request.form:
                 if current_user not in event.users:
@@ -403,7 +408,8 @@ def event(id):
                 return redirect(url_for('event', id=id))
 
     # don't show unapproved events to users who are not owners
-    if not event.approved and event.owner_id != current_user.id:
+    if (not event.approved and event.owner_id != current_user.id and
+            current_user.role.value < RoleEnum.moderator.value):
         flash(
             'You cannot see details of unapproved event, '
             'that has not been created by you!')
@@ -412,7 +418,8 @@ def event(id):
     return render_template('event.html', event=event, now=now, form=form,
                            filled_capacity=filled_capacity,
                            attend_form=attend_form,
-                           cancel_attend_form=cancel_attend_form)
+                           cancel_attend_form=cancel_attend_form,
+                           approval_form=approval_form)
 
 
 @app.route('/propose_place', methods=['GET', 'POST'])

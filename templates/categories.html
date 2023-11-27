@@ -12,7 +12,11 @@
         <ul class="place-list">
             {% for category in categories %}
                 <li class="place-item">
+                    {% if category.parent %}
+                    <h2 class="place-name">{{ category.parent.name }} -> {{ category.name }}</h2>
+                    {% else %}
                     <h2 class="place-name">{{ category.name }}</h2>
+                    {% endif %}
                     <p class="place-description">{{ category.description }}</p>
                     <div class="subcategory-list">
                         {% if category.children|length == 0 %}
