@@ -1,48 +1,23 @@
-from models import (
-    User,
-    RoleEnum,
-    db,
-    Event,
-    Place,
-    Category,
-    Review
-)
-from forms import (
-    EventForm,
-    PlaceForm,
-    CategoryForm,
-    ReviewForm,
-    FilterForm,
-    EventAttendanceForm,
-    EventAttendanceCancelForm,
-    EventApprovalForm,
-    DeleteReviewForm,
-    EditEventForm,
-    UserSearchForm,
-    UserUpdateForm
-)
-from yaml import load, FullLoader
-from sqlalchemy import and_, or_
-from flask_bcrypt import Bcrypt
-from datetime import datetime as dt, timedelta
 import calendar
+from datetime import datetime as dt
+from datetime import timedelta
+
+from flask import (Flask, flash, redirect, render_template, request, session,
+                   url_for)
+from flask_bcrypt import Bcrypt
+from flask_login import (LoginManager, current_user, login_required,
+                         login_user, logout_user)
+from flask_migrate import Migrate
+from sqlalchemy import and_, or_
+from yaml import FullLoader, load
+
+from forms import (CategoryForm, DeleteReviewForm, EditEventForm,
+                   EventAttendanceCancelForm, EventAttendanceForm, EventForm,
+                   FilterForm, PlaceForm, ReviewForm, UserSearchForm,
+                   UserUpdateForm, EventApprovalForm)
+from models import (Category, Event, Place, Review, RoleEnum, User, UserEvent,
+                    db)
 from utils import get_category_choices
-from flask import (
-    redirect,
-    request,
-    Flask,
-    render_template,
-    url_for,
-    flash,
-    session
-)
-from flask_login import (
-    LoginManager,
-    login_user,
-    login_required,
-    logout_user,
-    current_user
-)
 
 with open("config.yaml") as f:
     cfg = load(f, Loader=FullLoader)
@@ -56,6 +31,7 @@ database = cfg["database"]["name"]
 
 
 app = Flask(__name__)
+migrate = Migrate(app, db)
 
 app.config.update(
     SQLALCHEMY_DATABASE_URI=(
@@ -410,8 +386,11 @@ def event(id):
                 flash('Sorry, this event is full')
                 return redirect(url_for('event', id=id))
 
-            event.users.append(current_user)
-            db.session.commit()
+            user_event = UserEvent(
+                    event_id=event.id,
+                    user_id=current_user.id
+                )
+            user_event.insert()
             return redirect(url_for('event', id=id))
 
         elif attend_form.validate_on_submit() and 'approve' in request.form:
@@ -424,8 +403,8 @@ def event(id):
                     flash('You are not a participant of this event')
                     return redirect(url_for('event', id=id))
 
-                event.users.remove(current_user)
-                db.session.commit()
+                user_event = UserEvent.get_item(current_user.id, event.id)
+                user_event.delete_item()
                 return redirect(url_for('event', id=id))
 
     # don't show unapproved events to users who are not owners
