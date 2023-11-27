@@ -54,6 +54,10 @@ class UserEvent(db.Model):
             Integer,
             nullable=True
             )
+    approved: Mapped[bool] = mapped_column(
+            Boolean,
+            default=True
+            )
 
     def get_item(user_id, event_id):
         query = db.select(UserEvent).filter_by(
