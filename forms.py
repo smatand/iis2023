@@ -6,7 +6,7 @@ from wtforms import (BooleanField, DateTimeField, IntegerField, SelectField,
                      TextAreaField, widgets)
 from wtforms.validators import DataRequired, Length, Optional
 
-from models import Category, Place, RoleEnum
+from models import Category, Place, RoleEnum, Admission
 from utils import get_category_choices, validate_date
 
 
@@ -35,6 +35,13 @@ class EventForm(FlaskForm):
                                        widget=widgets.ListWidget(
                                            prefix_label=False
                                            ))
+    admission_ids = SelectMultipleField('Admission',
+                                        validators=[Optional()],
+                                        coerce=int,
+                                        option_widget=widgets.CheckboxInput(),
+                                        widget=widgets.ListWidget(
+                                            prefix_label=False
+                                        ))
     submit = SubmitField('Create Event')
 
     def __init__(self, *args, **kwargs):
@@ -42,6 +49,9 @@ class EventForm(FlaskForm):
         self.place_id.choices = [(p.id, p.name) for p in Place.query.all()]
         self.category_ids.choices = [
             (c.id, c.name) for c in Category.query.all()
+            ]
+        self.admission_ids.choices = [
+            (c.id, c.name) for c in Admission.query.all()
             ]
 
 
@@ -59,7 +69,7 @@ class EditEventForm(FlaskForm):
         default=datetime.now() + timedelta(hours=1)
     )
     capacity = IntegerField('Capacity', validators=[DataRequired()])
-    description = StringField('Description', validators=[DataRequired()])
+    description = StringField('Description')
     image = StringField('Image URL')
     place_id = SelectField('Place', validators=[DataRequired()], coerce=int)
     category_ids = SelectMultipleField('Category',
@@ -69,6 +79,13 @@ class EditEventForm(FlaskForm):
                                        widget=widgets.ListWidget(
                                            prefix_label=False
                                            ))
+    admission_ids = SelectMultipleField('Admission',
+                                        validators=[Optional()],
+                                        coerce=int,
+                                        option_widget=widgets.CheckboxInput(),
+                                        widget=widgets.ListWidget(
+                                            prefix_label=False
+                                        ))
 
     submit = SubmitField('Submit changes')
 
@@ -77,6 +94,9 @@ class EditEventForm(FlaskForm):
         self.place_id.choices = [(p.id, p.name) for p in Place.query.all()]
         self.category_ids.choices = [
             (c.id, c.name) for c in Category.query.all()
+            ]
+        self.admission_ids.choices = [
+            (c.id, c.name) for c in Admission.query.all()
             ]
 
 

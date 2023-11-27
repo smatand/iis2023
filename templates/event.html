@@ -23,6 +23,14 @@
         <div class="detail-cat"><strong>Place:</strong>
             <div class="event-places-tag">{{ event.place.name }}</div>
         </div>
+        <div class="detail-cat"><strong>Admission:</strong></div>
+        {% if event.admissions %}
+        {% for admission in event.admissions %}
+        <div class="event-places-tag">{{ admission.name }}: EUR {{ admission.amount }}</div>
+        {% endfor %}
+        {% else %}
+        <div class="event-places-tag">Free to attend</div>
+        {% endif %}
         <div class="description">
             <p>{{ event.description }}</p>
         </div>

@@ -39,9 +39,13 @@
         <label for="place_id">{{ form.place_id.label }}*<span>:</span></label>
         {{ form.place_id(value=1) }}
       </div>
-      <div class=""form-field">
+      <div>
         <label for="category_id">{{ form.category_ids.label }}<span>:</span></label>
         {{ form.category_ids() }}
+      </div>
+      <div>
+        <label for="admission_id">{{ form.admission_ids.label }}<span>:</span></label>
+        {{ form.admission_ids() }}
       </div>
       <div class="form-field">
         <label for="description">{{ form.description.label }}<span>:</span></label>

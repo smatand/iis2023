@@ -6,7 +6,8 @@ from models import (
     Place,
     Category,
     Review,
-    UserEvent
+    UserEvent,
+    Admission
 )
 from forms import (
     EventForm,
@@ -261,6 +262,11 @@ def create_event():
                                        ], form.category_ids.data) if checked]
         form.category_ids.choices = get_category_choices()
 
+        admission_ids = [
+            id for id, checked in zip([choice[0] for choice
+                                       in form.admission_ids.choices
+                                       ], form.admission_ids.data) if checked]
+
         place_id = form.place_id.data
 
         event = Event()
@@ -276,6 +282,12 @@ def create_event():
         categories = Category.query.filter(Category.id.in_(category_ids)).all()
         for category in categories:
             event.categories.append(category)
+
+        admissions = Admission.query.filter(
+            Admission.id.in_(admission_ids)
+            ).all()
+        for admission in admissions:
+            event.admissions.append(admission)
 
         if Event.query.filter_by(name=event.name).first():
             flash('Event with the same name already exists')
@@ -311,11 +323,19 @@ def edit_event(id):
         return redirect(url_for('event', id=id))
 
     form = EditEventForm()
+    form.category_ids.choices = get_category_choices()
+    form.category_ids.choices.pop(0)
+
     if form.validate_on_submit():
         category_ids = [
             id for id, checked in zip([choice[0] for choice
                                        in form.category_ids.choices
                                        ], form.category_ids.data) if checked]
+        form.category_ids.choices = get_category_choices()
+        admission_ids = [
+            id for id, checked in zip([choice[0] for choice
+                                      in form.admission_ids.choices], form.admission_ids.data) if checked]
+
         place_id = form.place_id.data
 
         event.start_datetime = form.start_datetime.data
@@ -329,6 +349,13 @@ def edit_event(id):
         event.categories.clear()
         for category in categories:
             event.categories.append(category)
+
+        admissions = Admission.query.filter(
+            Admission.id.in_(admission_ids)
+            ).all()
+        event.admissions.clear()
+        for admission in admissions:
+            event.admissions.append(admission)
 
         if event.approved is True:
             flash('You cannot edit approved event!')
@@ -346,9 +373,11 @@ def edit_event(id):
         form.image.data = event.image
         form.place_id.data = event.place_id
         form.category_ids.data = [category.id for category in event.categories]
+        form.admission_ids.data = [admission.id for admission in event.admissions]
 
     return render_template('edit_event.html',
                            form=form, event=event)
+
 
 
 @app.route("/home")
