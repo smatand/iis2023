@@ -1,10 +1,13 @@
+from datetime import datetime, timedelta
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
-from models import User, Category, Event, Place, Review, Admission, RoleEnum
-from datetime import datetime, timedelta
-from yaml import load, FullLoader
+from yaml import FullLoader, load
+
 from app import bcrypt
+from models import (Admission, Category, Event, Place, Review, RoleEnum, User,
+                    UserEvent, db)
 
 with open("config.yaml") as f:
     cfg = load(f, Loader=FullLoader)
@@ -17,13 +20,6 @@ port = cfg["server"]["port"]
 
 database = cfg["database"]["name"]
 
-
-class Base(DeclarativeBase):
-    pass
-
-
-db = SQLAlchemy(model_class=Base)
-
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = (
     f'postgresql://{username}:{password}@{ip}:{port}/{database}'
@@ -34,30 +30,44 @@ db.init_app(app)
 app.app_context().push()
 
 if __name__ == "__main__":
+    free_admission = Admission(
+            name="free",
+            amount=0
+            )
+    free_admission.insert()
+
+    adult_admission = Admission(
+            name="adult",
+            amount=100
+            )
+    adult_admission.insert()
+
     d105 = Place(
             name="d105",
             address="B/D105",
             description="Room D105"
             )
+    d105.insert()
 
     e112 = Place(
             name="e112",
             address="B/E112",
             description="Room E112"
             )
+    e112.insert()
 
     education = Category(
             name="education",
             description="Education events"
             )
-    db.session.add(education)
-    db.session.commit()
+    education.insert()
 
     lecture = Category(
             name="lecture",
             description="Lecture events",
             parent_id=1
             )
+    lecture.insert()
 
     password = bcrypt.generate_password_hash("user1").decode('utf-8')
     user1 = User(
@@ -65,6 +75,7 @@ if __name__ == "__main__":
             password=password,
             role=RoleEnum.user
             )
+    user1.insert()
 
     password = bcrypt.generate_password_hash("user2").decode('utf-8')
     user2 = User(
@@ -72,6 +83,7 @@ if __name__ == "__main__":
             password=password,
             role=RoleEnum.user
             )
+    user2.insert()
 
     password = bcrypt.generate_password_hash("mod").decode('utf-8')
     mod = User(
@@ -79,12 +91,15 @@ if __name__ == "__main__":
             password=password,
             role=RoleEnum.moderator
             )
+    mod.insert()
+
     password = bcrypt.generate_password_hash("admin").decode('utf-8')
     admin = User(
-            name="admon",
+            name="admin",
             password=password,
             role=RoleEnum.administrator
             )
+    admin.insert()
 
     start = (datetime.now() - timedelta(days=1)).strftime(
             format="%Y-%m-%d %H:%M:%S"
@@ -101,6 +116,11 @@ if __name__ == "__main__":
             owner_id=1
             )
 
+    iis.admissions.append(adult_admission)
+    iis.categories.append(lecture)
+    iis.categories.append(education)
+    iis.insert()
+
     isa = Event(
             name="ISA",
             start_datetime=start,
@@ -111,13 +131,19 @@ if __name__ == "__main__":
             place_id=2,
             owner_id=2,
             approved=True
-    )
+            )
+
+    isa.admissions.append(free_admission)
+    isa.categories.append(education)
+    isa.insert()
+
     iis_review = Review(
             comment="best lecture ever",
             rating=10,
             user_id=1,
             event_id=1
             )
+    iis_review.insert()
 
     isa_review = Review(
             comment="it's too long",
@@ -125,46 +151,34 @@ if __name__ == "__main__":
             user_id=2,
             event_id=2
             )
+    isa_review.insert()
 
-    free_admission = Admission(
-            name="free",
-            amount=0
+    user1_iis = UserEvent(
+            event_id=1,
+            user_id=1
+            )
+    user2_iis = UserEvent(
+            event_id=1,
+            user_id=2
+            )
+    mod_iis = UserEvent(
+            event_id=1,
+            user_id=3
             )
 
-    iis.categories.append(lecture)
-    iis.categories.append(education)
-    isa.categories.append(education)
+    user1_iis.insert()
+    user2_iis.insert()
+    mod_iis.insert()
 
-    iis.users.append(user1)
-    iis.users.append(user2)
-    iis.users.append(mod)
-    isa.users.append(user1)
-    isa.users.append(user2)
+    user1_isa = UserEvent(
+            event_id=2,
+            user_id=1
+            )
+    user2_isa = UserEvent(
+            event_id=2,
+            user_id=2
+            )
 
-    isa.admissions.append(free_admission)
+    user1_isa.insert()
+    user2_isa.insert()
 
-    db.session.add(d105)
-    db.session.add(e112)
-    db.session.commit()
-    db.session.add(education)
-    db.session.commit()
-    db.session.add(lecture)
-    db.session.commit()
-    db.session.add(user1)
-    db.session.commit()
-    db.session.add(user2)
-    db.session.commit()
-    db.session.add(mod)
-    db.session.commit()
-    db.session.add(admin)
-    db.session.commit()
-    db.session.add(iis)
-    db.session.commit()
-    db.session.add(isa)
-    db.session.commit()
-    db.session.add(iis_review)
-    db.session.commit()
-    db.session.add(isa_review)
-    db.session.commit()
-    db.session.add(free_admission)
-    db.session.commit()
