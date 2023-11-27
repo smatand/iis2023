@@ -331,6 +331,10 @@ if __name__ == "__main__":
         event_id=5,
         user_id=1,
     ))
+    db.session.add(UserEvent(
+        event_id=1,
+        user_id=1,
+    ))
     db.session.commit()
 
     futbal_zapas = Review(

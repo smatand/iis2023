@@ -520,7 +520,7 @@ def event(id):
                 return redirect(url_for('event', id=id))
 
             if review.user_id != current_user.id and \
-                    current_user.role < RoleEnum.moderator:
+                    current_user.role.value < RoleEnum.moderator.value:
                 flash('You can delete only your own reviews')
                 return redirect(url_for('home'))
 
