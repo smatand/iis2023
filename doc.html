@@ -48,7 +48,73 @@ TODO
 <p>Přiložte odkaz na komentované video demostrující použití informačního systému. Zaměřte se na případy užití definované zadáním (např. registrace uživatele, správa uživatelù a činnosti jednotlivých rolí). Video nahrajte například na VUT Google Drive, kde ho bude možné přímo spustit z odkazu.</p> 
 
 <h2>Implementace</h2>
-<p>Stručná dokumentace k implementaci, která popisuje, které části projektu (napø. PHP skripty) implementují jednotlivé případy použití.</p>
+<p>V súbore <code>app.py</code> nájdete nasledujúcu implementáciu</p>
+<ul>
+<li><b>administrátor</b>
+<ul>
+<li>spravuje uživatele</li><br>
+<code>@app.route("/users", methods=['GET', 'POST'])</code>
+<li>má práva všech následujících rolí</li>
+</ul>
+</li>
+<li><b>moderátor</b>
+<ul>
+<li>schvaluje události</li><br>
+<code>@app.route('/event/<int:id>', methods=['GET', 'POST'])</code><br>
+<code>elif attend_form.validate_on_submit() and 'approve' in request.form:</code>
+<li>schvaluje místa konání a provádí jejich správu</li><br>
+<code>@app.route('/places', methods=['GET'])</code>
+<code>@app.route('/approve_place/<int:id>', methods=['GET', 'POST'])</code>
+<li>schvaluje kategorie a provádí jejich správu</li><br>
+<code>@app.route('/categories', methods=['GET'])</code><br>
+<code>@app.route('/approve_category/<int:id>', methods=['GET', 'POST'])</code>
+<li>moderuje komentáře událostí</li><br>
+<code>@app.route('/event/<int:id>', methods=['GET', 'POST'])</code><br>
+<code>elif delete_review_form.validate_on_submit and 'delete_review'...</code>
+</ul>
+</li>
+<li><b>registrovaný uživatel</b>
+<ul>
+<li>prochází osobní kalendář událostí</li><br>
+<code>@app.route("/home")</code><br>
+<li>zakládá události - stává se <b>správcem události</b><br>
+    <code>@app.route("/create_event", methods=['GET', 'POST'])</code><br>
+    <code>@app.route('/event/<int:id>', methods=['GET', 'POST'])</code>
+<ul>
+<li>posílá žádosti o schválení události >> to je v momente vytovrenia udalosti, avšak user stále môže editovať event</li><br>
+    <code>@app.route("/create_event", methods=['GET', 'POST'])</code><br>
+    <code>@app.route("/edit_event/<int:id>", methods=['GET', 'POST'])</code>
+<li>navrhuje nová místa konání do katalogu existujících míst</li><br>
+<code>@app.route('/places', methods=['GET'])</code><br>
+<code>@app.route('/propose_place', methods=['GET', 'POST'])</code>
+<li>navrhuje nové kategorie událostí</li><br>
+<code>@app.route('/categories', methods=['GET'])</code><br>
+<code>@app.route('/propose_category', methods=['GET', 'POST'])</code>
+<li>potvrzuje úhradu vstupného předem, pokud je v dané akci vyžadováno</li><br>
+<code>@app.route('/event/<int:id>', methods=['GET', 'POST'])</code><br>
+<code>elif request_approval_form.validate_on_submit()...</code>
+</ul>
+</li>
+<li>registruje se na událostí - stává se <b>účastníkem události</b></li><br>
+<code>@app.route('/event/<int:id>', methods=['GET', 'POST'])</code><br>
+<code>elif attend_form.validate_on_submit() and 'attend' in request.form:</code>
+<ul>
+<li>hodnotí a komentuje události po jejich ukončení</li><br>
+<code>@app.route('/event/<int:id>', methods=['GET', 'POST'])</code><br>
+<code>elif delete_review_form.validate_on_submit and 'delete_review' \</code><br>
+<code>if form.validate_on_submit() and 'submit_review' in request.form:</code>
+<code></code>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>neregistrovaný uživatel</b>
+<ul>
+<li>prochází události</li><br>
+<code>@app.route("/", methods=['GET', 'POST'])</code>
+</ul>
+</li>
+</ul>
 
 <h3>Databáze</h3>
 <img src="./diagram.png" alt="database diagram">
@@ -98,9 +164,8 @@ Pro naplnění databáze testovacími daty lze použít skript <code>fill_db.py<
 </code>
 </p>
 
-
 <h2>Známé problémy</h2>
-<p>Zde popište, které body zadání nejsou implementovány a z jakého dùvodu. Např. &bdquo;Z časových důvodů nebyla implementována správa uživatelù.&rdquo; Pomůžete tím zrychlit hodnocení, když neimplementované funkce nebudeme muset dlouze hledat.</p>
+<p>Na poslednú chvíľu sme si všimli, že užívateľ môže zaslať moderátorom/adminom žiadosť o schválenie udalosti. Našou (alternatívnou) implementáciou užívateľ pošle žiadosť o schválenie udalosti v momente vytvorenia, avšak má možnosť meniť údaje v udalosti až do momentu schválenia. Po schválení už potvrdzuje prichádzajúce žiadosti (simulácia úhrady vstupného)</p>
 
 </body>
 </html>
