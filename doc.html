@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Projekt IIS</title>
+    <style type="text/css">
+    	table { border-collapse: collapse; }
+    	td, th { border: 1px solid black; padding: 0.3em 0.5em; text-align: left; }
+    	dt { font-weight: bold; margin-top: 0.5em; }
+    </style>
+</head>
+<body>
+
+<h1>Akce a události</h1>
+
+<dl>
+	<dt>Autoři</dt>
+	<dd>Andrej Smatana
+	    <a href="mailto:xsmata03@stud.fit.vutbr.cz">xsmata03@stud.fit.vutbr.cz</a> -
+        BE, Uživatelská část FE
+	</dd>
+	<dd>Martin Maršalek
+	    <a href="mailto:xmarsa15@stud.fit.vutbr.cz">xmarsa15@stud.fit.vutbr.cz</a> - 
+		BE, Administrátorská a moderátorská část FE
+	</dd>
+  <dd>Radim Šafář
+	    <a href="mailto:xsafar27@stud.fit.vutbr.cz">xsafar27@stud.fit.vutbr.cz</a> - 
+		BE, databáze a nasazení
+	</dd>
+	<dt>URL aplikace</dt>
+	<dd><a href="https://xsmata03.fun">https://xsmata03.fun</a></dd>
+</dl>
+
+<h2>Uživatelé systému pro testování</h2>
+<p>Uveïte prosím existující zástupce <strong>v¹ech rolí u¾ivatelù</strong>.</p>
+<table>
+<tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
+<tr><td>admin</td><td>admin</td><td>Administrátor</td></tr>
+<tr><td>mod</td><td>mod</td><td>Moderátor</td></tr>
+<tr><td>user1</td><td>user1</td><td>Uživatel</td></tr>
+<tr><td>user2</td><td>user2</td><td>Uživatel</td></tr>
+</table>
+
+<h3>Video</h3>
+TODO
+<p>Přiložte odkaz na komentované video demostrující použití informačního systému. Zaměřte se na případy užití definované zadáním (např. registrace uživatele, správa uživatelù a činnosti jednotlivých rolí). Video nahrajte například na VUT Google Drive, kde ho bude možné přímo spustit z odkazu.</p> 
+
+<h2>Implementace</h2>
+<p>Stručná dokumentace k implementaci, která popisuje, které části projektu (napø. PHP skripty) implementují jednotlivé případy použití.</p>
+
+<h3>Databáze</h3>
+<img src="./diagram.png" alt="database diagram">
+
+<h2>Instalace</h2>
+
+<h3> Požadavky </h3>
+<ul>
+    <li> Python3.10+ </li>
+    <li> Docker (na databázi) </li>
+</ul>
+
+<h3> Instalace systému </h3>
+<p>
+Pro zprovoznení systému je třeba vytvořit python virtuální prostředí a nainstalovat potřebné balíčky: <br>
+<code>
+    $ python3 -m venv env <br>
+    $ source env/bin/activate <br>
+    $ (env) pip install -r requirements.txt <br>
+</code>
+</p>
+
+<h3> Instalace databáze </h3>
+<p>
+Pro snadné nasazení databáze je přiložen <code>docker-compose.yml</code>. <br>
+Stačí tedy <code>docker compose up</code> pro spuštění databáze. <br>
+S přepínačem <code>-d</code> se kontejner spustí na pozadí.
+</p>
+
+<p>
+Následně je třeba spojit aplikaci s databází: <br>
+Při použití docker-compose není třeba měnit konfigurační soubor <code>config.yaml</code> <br>
+<code>
+    $ (env) python3 <br>
+    >>> from app import app, db <br>
+    >>> with app.app_context(): <br>
+    ...     db.create_all() <br>
+    ... <br>
+    >>> <br>
+</code>
+</p>
+
+<p>
+Pro naplnění databáze testovacími daty lze použít skript <code>fill_db.py</code>:<br>
+<code>
+    $ (env) python fill_db.py
+</code>
+</p>
+
+
+<h2>Známé problémy</h2>
+<p>Zde popište, které body zadání nejsou implementovány a z jakého dùvodu. Např. &bdquo;Z časových důvodů nebyla implementována správa uživatelù.&rdquo; Pomůžete tím zrychlit hodnocení, když neimplementované funkce nebudeme muset dlouze hledat.</p>
+
+</body>
+</html>
