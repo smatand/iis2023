@@ -170,9 +170,11 @@ def edit_user(id):
 
     if form.validate_on_submit():
         desired_role = form.role.data
-        user.role = RoleEnum[desired_role].name
+        user.role = RoleEnum[desired_role]
         db.session.commit()
         return redirect(url_for('edit_user', id=id))
+
+    form.role.data = user.role.name
 
     return render_template('edit_user.html', form=form, user=user)
 
@@ -229,8 +231,14 @@ def login():
 
         user = User.query.filter_by(name=username).first()
         if user and bcrypt.check_password_hash(user.password, password):
-            login_user(user)
-            return redirect(url_for('home'))
+            if user.role.value == RoleEnum.deactivated.value:
+                return render_template(
+                    'login.html',
+                    error="This account has been deactivated"
+                )
+            else:
+                login_user(user)
+                return redirect(url_for('home'))
         else:
             return render_template(
                 'login.html',
