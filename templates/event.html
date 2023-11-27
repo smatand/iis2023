@@ -66,6 +66,13 @@
             <p class="review-user">{{ review.user.name }}</p>
             <p class="comment">{{ review.comment }}</p>
             <p class="rating">Rating: {{ review.rating }} / 10</p>
+            {% if current_user.role.value > 1 or current_user.id == review.user_id %}
+            {{ approval_form.hidden_tag() }}
+                <form method="POST">
+                <input type="hidden" name="review_id" value="{{ review.id }}">
+                <button type="submit" name="delete_review" class="delete-button-2">Delete review</button>
+                </form>
+            {% endif %}
         </div>
         {% endfor %}
 </div>

@@ -415,6 +415,7 @@ def event(id):
     approval_form = EventApprovalForm()
     request_approval_form = EventApproveRequestForm()
     cancel_request_form = EventCancelRequestForm()
+    delete_review_form = DeleteReviewForm()
 
     if request.method == 'POST':
 
@@ -511,6 +512,22 @@ def event(id):
                 db.session.delete(user_event)
                 db.session.commit()
                 return redirect(url_for('event', id=id))
+        elif delete_review_form.validate_on_submit and 'delete_review' \
+                in request.form:
+            review_id = request.form.get('review_id')
+            review = Review.query.get(review_id)
+            if review is None:
+                return redirect(url_for('event', id=id))
+
+            if review.user_id != current_user.id and \
+                    current_user.role < RoleEnum.moderator:
+                flash('You can delete only your own reviews')
+                return redirect(url_for('home'))
+
+            db.session.delete(review)
+            db.session.commit()
+            flash('Review has been deleted!', 'success')
+            return redirect(url_for('event', id=id))
 
     # don't show unapproved events to users who are not owners
     if (not event.approved and event.owner_id != current_user.id and
