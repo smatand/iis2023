@@ -5,7 +5,8 @@ from models import (
     Event,
     Place,
     Category,
-    Review
+    Review,
+    UserEvent
 )
 from forms import (
     EventForm,
@@ -290,7 +291,7 @@ def create_event():
             'Event has been created. Wait for the approval from moderators',
             'success'
         )
-        return redirect(url_for('home'))
+        return redirect(url_for('event', id=event.id))
 
     return render_template(
         'create_event.html',
@@ -402,7 +403,11 @@ def event(id):
             db.session.commit()
             return redirect(url_for('event', id=id))
         elif attend_form.validate_on_submit() and 'attend' in request.form:
-            if current_user in event.users:
+            user_event = UserEvent.query.filter_by(
+                user_id=current_user.id,
+                event_id=id
+            ).all()
+            if event in user_event:
                 flash('You are already a participant of this event')
                 return redirect(url_for('event', id=id))
 
@@ -410,7 +415,11 @@ def event(id):
                 flash('Sorry, this event is full')
                 return redirect(url_for('event', id=id))
 
-            event.users.append(current_user)
+            user_event = UserEvent(
+                user_id=current_user.id,
+                event_id=id
+            )
+            db.session.add(user_event)
             db.session.commit()
             return redirect(url_for('event', id=id))
 
@@ -420,13 +429,24 @@ def event(id):
 
         elif cancel_attend_form.validate_on_submit():
             if 'cancel_attend' in request.form:
-                if current_user not in event.users:
+                user_event = UserEvent.query.filter_by(
+                    user_id=current_user.id,
+                    event_id=id
+                ).first()
+                if user_event is None:
                     flash('You are not a participant of this event')
                     return redirect(url_for('event', id=id))
 
-                event.users.remove(current_user)
+                db.session.delete(user_event)
                 db.session.commit()
                 return redirect(url_for('event', id=id))
+#                if current_user not in event.users:
+#                    flash('You are not a participant of this event')
+#                    return redirect(url_for('event', id=id))
+#
+#                event.users.remove(current_user)
+#                db.session.commit()
+#                return redirect(url_for('event', id=id))
 
     # don't show unapproved events to users who are not owners
     if (not event.approved and event.owner_id != current_user.id and

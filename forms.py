@@ -31,7 +31,7 @@ class EventForm(FlaskForm):
         default=datetime.now() + timedelta(hours=1)
     )
     capacity = IntegerField('Capacity', validators=[DataRequired()])
-    description = StringField('Description', validators=[DataRequired()])
+    description = StringField('Description')
     image = StringField('Image URL')
     place_id = SelectField('Place', validators=[DataRequired()], coerce=int)
     category_ids = SelectMultipleField('Category',
