@@ -23,6 +23,14 @@
         <div class="detail-cat"><strong>Place:</strong>
             <div class="event-places-tag">{{ event.place.name }}</div>
         </div>
+        <div class="detail-cat"><strong>Admission:</strong></div>
+        {% if event.admissions %}
+        {% for admission in event.admissions %}
+        <div class="event-places-tag">{{ admission.name }}: EUR {{ admission.amount }}</div>
+        {% endfor %}
+        {% else %}
+        <div class="event-places-tag">Free to attend</div>
+        {% endif %}
         <div class="description">
             <p>{{ event.description }}</p>
         </div>
@@ -43,7 +51,7 @@
         <button type="submit" name="attend" class="button-log">Attend</button>
     </form>
     {% else %}
-    <h3>You are signed in as a visitor of this event</h3>
+    <h3>This event is in your calendar of events to attend.</h3>
     <form method="POST">
         {{ cancel_attend_form.hidden_tag() }}
         <button type="submit" name="cancel_attend" class="button-log">Cancel attend</button>
@@ -77,4 +85,29 @@
 </div>
 {% endif %}
 {% endif %}
+<!-- to the owner of the event, show list of users that are in a queue of requests and let the user approve those requests through button -->
+{% if current_user == event.owner and event.approved %}
+    <!-- a little bit of space -->
+    <br><br><br>
+    {% if user_events %}
+    <h3>Requests to join the event</h3>
+    {% endif %}
+
+    {% for user_event in user_events %}
+        {% if user_event.approved == false %}
+            <div class="place-item">
+                <div class="place-name">{{ user_event.user.name }}</div>
+                <form method="POST">
+                    {{ request_approval_form.hidden_tag() }}
+                    <input type="hidden" name="user_id" value="{{ user_event.user.id }}">
+                    <input type="hidden" name="event_id" value="{{ user_event.event.id }}">
+                    <button type="submit" name="approve_request" class="button-log">Approve request</button>
+                    <button type="submit" name="cancel_request" class="button-log">Cancel request</button>
+                </form>
+            </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+
 {% endblock %}

@@ -118,7 +118,11 @@
                     <td class="event-table-data">{{ event.end_datetime }}</td>
                     <td class="event-table-data">
                         {% for category in event.categories %}
+                        {% if category.parent %}
+                        <div class="event-categories-tag">{{ category.parent.name }} -> {{ category.name }}</div>
+                        {% else %}
                         <div class="event-categories-tag">{{ category.name }}</div>
+                        {% endif %}
                         {% endfor %}
                     </td>
                     <td class="event-table-data">
@@ -138,7 +142,11 @@
                     <td class="event-table-data">{{ event.end_datetime }}</td>
                     <td class="event-table-data">
                         {% for category in event.categories %}
+                        {% if category.parent %}
+                        <div class="event-categories-tag">{{ category.parent.name }} -> {{ category.name }}</div>
+                        {% else %}
                         <div class="event-categories-tag">{{ category.name }}</div>
+                        {% endif %}
                         {% endfor %}
                     </td>
                     <td class="event-table-data">

@@ -126,10 +126,14 @@ if __name__ == "__main__":
             event_id=2
             )
 
-    free_admission = Admission(
-            name="free",
-            amount=0
-            )
+    student_admission = Admission(
+            name="student",
+            amount=10
+    )
+    adult_admission = Admission(
+                name="adult",
+                amount=20
+        )
 
     iis.categories.append(lecture)
     iis.categories.append(education)
@@ -141,15 +145,8 @@ if __name__ == "__main__":
     isa.users.append(user1)
     isa.users.append(user2)
 
-    isa.admissions.append(free_admission)
+    isa.admissions.append(student_admission)
 
-    db.session.add(d105)
-    db.session.add(e112)
-    db.session.commit()
-    db.session.add(education)
-    db.session.commit()
-    db.session.add(lecture)
-    db.session.commit()
     db.session.add(user1)
     db.session.commit()
     db.session.add(user2)
@@ -157,6 +154,13 @@ if __name__ == "__main__":
     db.session.add(mod)
     db.session.commit()
     db.session.add(admin)
+    db.session.commit()
+    db.session.add(d105)
+    db.session.add(e112)
+    db.session.commit()
+    db.session.add(education)
+    db.session.commit()
+    db.session.add(lecture)
     db.session.commit()
     db.session.add(iis)
     db.session.commit()
@@ -166,5 +170,7 @@ if __name__ == "__main__":
     db.session.commit()
     db.session.add(isa_review)
     db.session.commit()
-    db.session.add(free_admission)
+
+    db.session.add(student_admission)
+    db.session.add(adult_admission)
     db.session.commit()

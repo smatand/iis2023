@@ -30,12 +30,15 @@
                 {% if day != 0 %}
                 <div class="day-number">{{ day }}</div>
                 {% for event in events %}
-                    {% if event.start_datetime.day <= day and event.end_datetime.day >= day and event.start_datetime.month == month and event.start_datetime.year == year %}
-                    {% if event.approved %}
-                    <button class="event" onclick="window.location.href='{{ url_for('event', id=event.id) }}';">
-                        {{ event.name }}
-                    </button>
-                    {% endif %}
+                    {% if event.event.start_datetime.day <= day and event.event.end_datetime.day >= day and event.event.start_datetime.month == month and event.event.start_datetime.year == year %}
+                        {% if event.event.approved %}
+                                <!-- that's user event relation-->
+                                {% if event.approved %}
+                                    <button class="event" onclick="window.location.href='{{ url_for('event', id=event.event.id) }}';">{{ event.event.name }}</button>
+                                {% else %}
+                                    <button  class="event-waiting" onclick="window.location.href='{{ url_for('event', id=event.event.id) }}';">{{ event.event.name }} (requested)</button>
+                                {% endif %}
+                        {% endif %}
                     {% endif %}
                 {% endfor %}
                 {% endif %}

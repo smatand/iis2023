@@ -1,23 +1,53 @@
-import calendar
-from datetime import datetime as dt
-from datetime import timedelta
-
-from flask import (Flask, flash, redirect, render_template, request, session,
-                   url_for)
-from flask_bcrypt import Bcrypt
-from flask_login import (LoginManager, current_user, login_required,
-                         login_user, logout_user)
-from flask_migrate import Migrate
+import sys
+from models import (
+    User,
+    RoleEnum,
+    db,
+    Event,
+    Place,
+    Category,
+    Review,
+    UserEvent,
+    Admission
+)
+from forms import (
+    EventForm,
+    PlaceForm,
+    CategoryForm,
+    ReviewForm,
+    FilterForm,
+    EventAttendanceForm,
+    EventAttendanceCancelForm,
+    EventApprovalForm,
+    DeleteReviewForm,
+    EditEventForm,
+    UserSearchForm,
+    UserUpdateForm,
+    EventApproveRequestForm,
+    EventCancelRequestForm
+)
+from yaml import load, FullLoader
 from sqlalchemy import and_, or_
-from yaml import FullLoader, load
-
-from forms import (CategoryForm, DeleteReviewForm, EditEventForm,
-                   EventAttendanceCancelForm, EventAttendanceForm, EventForm,
-                   FilterForm, PlaceForm, ReviewForm, UserSearchForm,
-                   UserUpdateForm, EventApprovalForm)
-from models import (Category, Event, Place, Review, RoleEnum, User, UserEvent,
-                    db)
+from flask_bcrypt import Bcrypt
+from datetime import datetime as dt, timedelta
+import calendar
 from utils import get_category_choices
+from flask import (
+    redirect,
+    request,
+    Flask,
+    render_template,
+    url_for,
+    flash,
+    session
+)
+from flask_login import (
+    LoginManager,
+    login_user,
+    login_required,
+    logout_user,
+    current_user
+)
 
 with open("config.yaml") as f:
     cfg = load(f, Loader=FullLoader)
@@ -31,7 +61,6 @@ database = cfg["database"]["name"]
 
 
 app = Flask(__name__)
-migrate = Migrate(app, db)
 
 app.config.update(
     SQLALCHEMY_DATABASE_URI=(
@@ -227,14 +256,19 @@ def logout():
 def create_event():
     form = EventForm()
     form.category_ids.choices = get_category_choices()
-    # remove -----no parent category----
     form.category_ids.choices.pop(0)
     if form.validate_on_submit():
+        # only get categories that are approved
         category_ids = [
             id for id, checked in zip([choice[0] for choice
                                        in form.category_ids.choices
                                        ], form.category_ids.data) if checked]
         form.category_ids.choices = get_category_choices()
+
+        admission_ids = [
+            id for id, checked in zip([choice[0] for choice
+                                       in form.admission_ids.choices
+                                       ], form.admission_ids.data) if checked]
 
         place_id = form.place_id.data
 
@@ -252,6 +286,12 @@ def create_event():
         for category in categories:
             event.categories.append(category)
 
+        admissions = Admission.query.filter(
+            Admission.id.in_(admission_ids)
+            ).all()
+        for admission in admissions:
+            event.admissions.append(admission)
+
         if Event.query.filter_by(name=event.name).first():
             flash('Event with the same name already exists')
             return render_template(
@@ -266,7 +306,7 @@ def create_event():
             'Event has been created. Wait for the approval from moderators',
             'success'
         )
-        return redirect(url_for('home'))
+        return redirect(url_for('event', id=event.id))
 
     return render_template(
         'create_event.html',
@@ -286,11 +326,20 @@ def edit_event(id):
         return redirect(url_for('event', id=id))
 
     form = EditEventForm()
+    form.category_ids.choices = get_category_choices()
+    form.category_ids.choices.pop(0)
+
     if form.validate_on_submit():
         category_ids = [
             id for id, checked in zip([choice[0] for choice
                                        in form.category_ids.choices
                                        ], form.category_ids.data) if checked]
+        form.category_ids.choices = get_category_choices()
+        admission_ids = [
+            id for id, checked in zip([choice[0] for choice
+                                      in form.admission_ids.choices],
+                                      form.admission_ids.data) if checked]
+
         place_id = form.place_id.data
 
         event.start_datetime = form.start_datetime.data
@@ -304,6 +353,13 @@ def edit_event(id):
         event.categories.clear()
         for category in categories:
             event.categories.append(category)
+
+        admissions = Admission.query.filter(
+            Admission.id.in_(admission_ids)
+            ).all()
+        event.admissions.clear()
+        for admission in admissions:
+            event.admissions.append(admission)
 
         if event.approved is True:
             flash('You cannot edit approved event!')
@@ -321,6 +377,9 @@ def edit_event(id):
         form.image.data = event.image
         form.place_id.data = event.place_id
         form.category_ids.data = [category.id for category in event.categories]
+        form.admission_ids.data = [
+            admission.id for admission in event.admissions
+            ]
 
     return render_template('edit_event.html',
                            form=form, event=event)
@@ -332,11 +391,11 @@ def home():
     month, year = get_month_year()
     month_name = calendar.month_name[month]
 
-    events = Event.query.filter(Event.users.contains(current_user)).all()
+    user_events = UserEvent.query.filter_by(user_id=current_user.id).all()
 
     return render_template(
         'home.html',
-        events=events,
+        events=user_events,
         calendar=calendar,
         month=month,
         year=year,
@@ -347,12 +406,21 @@ def home():
 @app.route('/event/<int:id>', methods=['GET', 'POST'])
 def event(id):
     event = Event.query.get(id)
+    user_events = UserEvent.query.filter_by(event_id=id).all()
     now = dt.now()
-    filled_capacity = len(event.users)
+    # only events that have user_event.approved = True
+    event_users = UserEvent.query.filter_by(
+        event_id=id,
+        approved=True
+    ).all()
+    filled_capacity = len(event_users)
+
     form = ReviewForm()
     attend_form = EventAttendanceForm()
     cancel_attend_form = EventAttendanceCancelForm()
     approval_form = EventApprovalForm()
+    request_approval_form = EventApproveRequestForm()
+    cancel_request_form = EventCancelRequestForm()
 
     if request.method == 'POST':
 
@@ -378,7 +446,11 @@ def event(id):
             db.session.commit()
             return redirect(url_for('event', id=id))
         elif attend_form.validate_on_submit() and 'attend' in request.form:
-            if current_user in event.users:
+            user_event = UserEvent.query.filter_by(
+                user_id=current_user.id,
+                event_id=id
+            ).all()
+            if event in user_event:
                 flash('You are already a participant of this event')
                 return redirect(url_for('event', id=id))
 
@@ -386,11 +458,45 @@ def event(id):
                 flash('Sorry, this event is full')
                 return redirect(url_for('event', id=id))
 
-            user_event = UserEvent(
-                    event_id=event.id,
-                    user_id=current_user.id
+            if event.admissions:
+                user_event = UserEvent(
+                    user_id=current_user.id,
+                    event_id=id,
+                    approved=False
                 )
-            user_event.insert()
+                flash('Your request has been sent to the event owner')
+            else:
+                user_event = UserEvent(
+                    user_id=current_user.id,
+                    event_id=id
+                    # approved is defaultly True
+                )
+
+            db.session.add(user_event)
+            db.session.commit()
+            return redirect(url_for('event', id=id))
+
+        elif request_approval_form.validate_on_submit() \
+                and 'approve_request' in request.form:
+            user_event = UserEvent.query.filter_by(
+                user_id=request.form.get('user_id'),
+                event_id=id
+            ).first()
+            print("User Event Before: ", user_event, file=sys.stderr)
+
+            user_event.approved = True
+            db.session.commit()
+            return redirect(url_for('event', id=id))
+
+        elif cancel_request_form.validate_on_submit() \
+                and 'cancel_request' in request.form:
+            user_event = UserEvent.query.filter_by(
+                user_id=request.form.get('user_id'),
+                event_id=id
+            ).first()
+
+            db.session.delete(user_event)
+            db.session.commit()
             return redirect(url_for('event', id=id))
 
         elif attend_form.validate_on_submit() and 'approve' in request.form:
@@ -399,19 +505,23 @@ def event(id):
 
         elif cancel_attend_form.validate_on_submit():
             if 'cancel_attend' in request.form:
-                if current_user not in event.users:
+                user_event = UserEvent.query.filter_by(
+                    user_id=current_user.id,
+                    event_id=id
+                ).first()
+                if user_event is None:
                     flash('You are not a participant of this event')
                     return redirect(url_for('event', id=id))
 
-                user_event = UserEvent.get_item(current_user.id, event.id)
-                user_event.delete_item()
+                db.session.delete(user_event)
+                db.session.commit()
                 return redirect(url_for('event', id=id))
 
     # don't show unapproved events to users who are not owners
     if (not event.approved and event.owner_id != current_user.id and
             current_user.role.value < RoleEnum.moderator.value):
         flash(
-            'You cannot see details of unapproved event, '
+            'You cannot see details of an unapproved event, '
             'that has not been created by you!')
         return redirect(url_for('index'))
 
@@ -419,7 +529,9 @@ def event(id):
                            filled_capacity=filled_capacity,
                            attend_form=attend_form,
                            cancel_attend_form=cancel_attend_form,
-                           approval_form=approval_form)
+                           approval_form=approval_form,
+                           request_approval_form=request_approval_form,
+                           user_events=user_events)
 
 
 @app.route('/propose_place', methods=['GET', 'POST'])
@@ -464,7 +576,14 @@ def propose_place():
 @app.route('/places', methods=['GET'])
 @login_required
 def places():
-    places = Place.query.all()
+    places = []
+    if current_user.role == RoleEnum.moderator or \
+            current_user.role == RoleEnum.administrator:
+        places = Place.query.all()
+    else:
+        # user will see only approved places
+        places = Place.query.filter_by(approved=True).all()
+
     events = Event.query.all()
     return render_template('places.html', places=places, events=events)
 
@@ -472,8 +591,16 @@ def places():
 @app.route('/categories', methods=['GET'])
 @login_required
 def categories():
-    categories = Category.query.all()
+    categories = []
     events = Event.query.all()
+
+    if current_user.role == RoleEnum.moderator or \
+            current_user.role == RoleEnum.administrator:
+        categories = Category.query.all()
+    else:
+        # user will see only approved categories
+        categories = Category.query.filter_by(approved=True).all()
+
     return render_template(
         'categories.html',
         categories=categories,

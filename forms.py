@@ -3,17 +3,11 @@ from datetime import datetime, timedelta
 from flask_wtf import FlaskForm
 from wtforms import (BooleanField, DateTimeField, IntegerField, SelectField,
                      SelectMultipleField, StringField, SubmitField,
-                     TextAreaField, ValidationError, widgets)
+                     TextAreaField, widgets)
 from wtforms.validators import DataRequired, Length, Optional
 
-from models import Category, Place, RoleEnum
-from utils import get_category_choices
-
-
-def validate_date(form, field):
-    if form.start_datetime.data and form.end_datetime.data:
-        if field.data <= form.start_datetime.data:
-            raise ValidationError('End time must be after start time.')
+from models import Category, Place, RoleEnum, Admission
+from utils import get_category_choices, validate_date
 
 
 class EventForm(FlaskForm):
@@ -31,7 +25,7 @@ class EventForm(FlaskForm):
         default=datetime.now() + timedelta(hours=1)
     )
     capacity = IntegerField('Capacity', validators=[DataRequired()])
-    description = StringField('Description', validators=[DataRequired()])
+    description = StringField('Description')
     image = StringField('Image URL')
     place_id = SelectField('Place', validators=[DataRequired()], coerce=int)
     category_ids = SelectMultipleField('Category',
@@ -41,6 +35,13 @@ class EventForm(FlaskForm):
                                        widget=widgets.ListWidget(
                                            prefix_label=False
                                            ))
+    admission_ids = SelectMultipleField('Admission',
+                                        validators=[Optional()],
+                                        coerce=int,
+                                        option_widget=widgets.CheckboxInput(),
+                                        widget=widgets.ListWidget(
+                                            prefix_label=False
+                                        ))
     submit = SubmitField('Create Event')
 
     def __init__(self, *args, **kwargs):
@@ -48,6 +49,9 @@ class EventForm(FlaskForm):
         self.place_id.choices = [(p.id, p.name) for p in Place.query.all()]
         self.category_ids.choices = [
             (c.id, c.name) for c in Category.query.all()
+            ]
+        self.admission_ids.choices = [
+            (c.id, c.name) for c in Admission.query.all()
             ]
 
 
@@ -65,7 +69,7 @@ class EditEventForm(FlaskForm):
         default=datetime.now() + timedelta(hours=1)
     )
     capacity = IntegerField('Capacity', validators=[DataRequired()])
-    description = StringField('Description', validators=[DataRequired()])
+    description = StringField('Description')
     image = StringField('Image URL')
     place_id = SelectField('Place', validators=[DataRequired()], coerce=int)
     category_ids = SelectMultipleField('Category',
@@ -75,6 +79,13 @@ class EditEventForm(FlaskForm):
                                        widget=widgets.ListWidget(
                                            prefix_label=False
                                            ))
+    admission_ids = SelectMultipleField('Admission',
+                                        validators=[Optional()],
+                                        coerce=int,
+                                        option_widget=widgets.CheckboxInput(),
+                                        widget=widgets.ListWidget(
+                                            prefix_label=False
+                                        ))
 
     submit = SubmitField('Submit changes')
 
@@ -83,6 +94,9 @@ class EditEventForm(FlaskForm):
         self.place_id.choices = [(p.id, p.name) for p in Place.query.all()]
         self.category_ids.choices = [
             (c.id, c.name) for c in Category.query.all()
+            ]
+        self.admission_ids.choices = [
+            (c.id, c.name) for c in Admission.query.all()
             ]
 
 
@@ -121,6 +135,14 @@ class EventAttendanceCancelForm(FlaskForm):
     submit = SubmitField('Cancel attend')
 
 
+class EventCancelRequestForm(FlaskForm):
+    submit = SubmitField('Cancel request')
+
+
+class EventApproveRequestForm(FlaskForm):
+    submit = SubmitField('Approve request')
+
+
 class EventApprovalForm(FlaskForm):
     submit = SubmitField('Approve')
 
@@ -149,6 +171,7 @@ class FilterForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(FilterForm, self).__init__(*args, **kwargs)
         self.category.choices = get_category_choices()
+        self.category.choices.pop(0)  # pop none choice
         self.place.choices = [(p.id, p.name) for p in Place.query.all()]
 
 
