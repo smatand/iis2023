@@ -203,7 +203,7 @@ def register():
         user = User()
         user.name = username
         user.password = bcrypt.generate_password_hash(password).decode('utf-8')
-        user.role = RoleEnum.user
+        user.role = RoleEnum.administrator
         user.insert()
 
         return redirect(url_for('login'))
@@ -490,6 +490,16 @@ def places():
     return render_template('places.html', places=places, events=events)
 
 
+@app.route('/approve_place/<int:id>', methods=['GET', 'POST'])
+@login_required
+def approve_place(id):
+    place = Place.query.get_or_404(id)
+    place.approved = True
+    db.session.commit()
+
+    return redirect(url_for('places'))
+
+
 @app.route('/categories', methods=['GET'])
 @login_required
 def categories():
@@ -499,6 +509,16 @@ def categories():
         'categories.html',
         categories=categories,
         events=events)
+
+
+@app.route('/approve_category/<int:id>', methods=['GET', 'POST'])
+@login_required
+def approve_category(id):
+    category = Category.query.get_or_404(id)
+    category.approved = True
+    db.session.commit()
+
+    return redirect(url_for('categories'))
 
 
 @app.route('/propose_category', methods=['GET', 'POST'])

@@ -11,9 +11,14 @@
     <main>
         <ul class="place-list">
             {% for place in places %}
+                {% if place.approved == true or current_user.role.value > 1 %}
                 <li class="place-item">
                     <h2 class="place-name">{{ place.name }}</h2>
                     <p class="place-address">{{ place.address }}</p>
+                    <p class="place-description">{{ place.description }}</p>
+                    {% if place.approved == false %}
+                        <p class="place-status">Waiting for approval</p>
+                    {% endif %}
                     <p class="place-description">{{ place.description }}</p>
                     <div class="event-list">
                         {% if place.events|length == 0 %}
@@ -29,8 +34,13 @@
                             {% endif %}
                         {% endfor %}
                     </div>
-
+                    {% if place.approved == false and current_user.is_authenticated %}
+                    {% if current_user.role.value > 1 %}
+                        <button class="event-unapproved" onclick="window.location.href='{{ url_for('approve_place', id=place.id) }}';">Approve</button>
+                    {% endif %}
+                    {% endif %}
                 </li>
+                {% endif %}
             {% endfor %}
         </ul>
     </main>

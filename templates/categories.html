@@ -11,9 +11,13 @@
     <main>
         <ul class="place-list">
             {% for category in categories %}
+                {% if category.approved == true or current_user.role.value > 1 %}
                 <li class="place-item">
                     <h2 class="place-name">{{ category.name }}</h2>
                     <p class="place-description">{{ category.description }}</p>
+                    {% if category.approved == false %}
+                        <p class="place-status">Waiting for approval</p>
+                    {% endif %}
                     <div class="subcategory-list">
                         {% if category.children|length == 0 %}
                             <p>No subcategories</p>
@@ -40,8 +44,13 @@
                             {% endif %}
                         {% endfor %}
                     </div>
-
+                    {% if category.approved == false and current_user.is_authenticated %}
+                    {% if current_user.role.value > 1 %}
+                        <button class="event-unapproved" onclick="window.location.href='{{ url_for('approve_category', id=category.id) }}';">Approve</button>
+                    {% endif %}
+                    {% endif %}
                 </li>
+                {% endif %}
             {% endfor %}
         </ul>
     </main>
