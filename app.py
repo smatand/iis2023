@@ -233,8 +233,8 @@ def login():
         if user and bcrypt.check_password_hash(user.password, password):
             if user.role.value == RoleEnum.deactivated.value:
                 return render_template(
-                'login.html',
-                error="This account has been deactivated"
+                    'login.html',
+                    error="This account has been deactivated"
                 )
             else:
                 login_user(user)
