@@ -1,21 +1,13 @@
 from datetime import datetime, timedelta
-from flask_wtf import FlaskForm
-from models import Place, Category, RoleEnum
-from utils import get_category_choices
 
-from wtforms import (
-    StringField,
-    DateTimeField,
-    IntegerField,
-    SubmitField,
-    ValidationError,
-    SelectField,
-    TextAreaField,
-    SelectMultipleField,
-    widgets,
-    BooleanField
-)
+from flask_wtf import FlaskForm
+from wtforms import (BooleanField, DateTimeField, IntegerField, SelectField,
+                     SelectMultipleField, StringField, SubmitField,
+                     TextAreaField, ValidationError, widgets)
 from wtforms.validators import DataRequired, Length, Optional
+
+from models import Category, Place, RoleEnum
+from utils import get_category_choices
 
 
 def validate_date(form, field):

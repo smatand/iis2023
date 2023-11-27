@@ -1,51 +1,23 @@
-from models import (
-    User,
-    RoleEnum,
-    db,
-    Event,
-    Place,
-    Category,
-    Review,
-    UserEvent
-)
-from forms import (
-    EventForm,
-    PlaceForm,
-    CategoryForm,
-    ReviewForm,
-    FilterForm,
-    EventAttendanceForm,
-    EventAttendanceCancelForm,
-    DeleteReviewForm,
-    EditEventForm,
-    UserSearchForm,
-    UserUpdateForm
-)
-from yaml import load, FullLoader
-from sqlalchemy import and_, or_
-from flask_bcrypt import Bcrypt
-from datetime import datetime as dt, timedelta
 import calendar
-from utils import get_category_choices
-from flask import (
-    redirect,
-    request,
-    Flask,
-    render_template,
-    url_for,
-    flash,
-    session
-)
-from flask_login import (
-    LoginManager,
-    login_user,
-    login_required,
-    logout_user,
-    current_user
-)
+from datetime import datetime as dt
+from datetime import timedelta
 
+from flask import (Flask, flash, redirect, render_template, request, session,
+                   url_for)
+from flask_bcrypt import Bcrypt
+from flask_login import (LoginManager, current_user, login_required,
+                         login_user, logout_user)
 from flask_migrate import Migrate
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import and_, or_
+from yaml import FullLoader, load
+
+from forms import (CategoryForm, DeleteReviewForm, EditEventForm,
+                   EventAttendanceCancelForm, EventAttendanceForm, EventForm,
+                   FilterForm, PlaceForm, ReviewForm, UserSearchForm,
+                   UserUpdateForm)
+from models import (Category, Event, Place, Review, RoleEnum, User, UserEvent,
+                    db)
+from utils import get_category_choices
 
 with open("config.yaml") as f:
     cfg = load(f, Loader=FullLoader)
@@ -412,8 +384,11 @@ def event(id):
             if filled_capacity == event.capacity:
                 flash('Sorry, this event is full')
                 return redirect(url_for('event', id=id))
-            
-            user_event = UserEvent(event_id = event.id, user_id=current_user.id)
+
+            user_event = UserEvent(
+                    event_id=event.id,
+                    user_id=current_user.id
+                )
             user_event.insert()
             return redirect(url_for('event', id=id))
 
@@ -423,8 +398,7 @@ def event(id):
                     flash('You are not a participant of this event')
                     return redirect(url_for('event', id=id))
 
-                event.users.remove(current_user)
-                user_event = db.session.execute(db.select(UserEvent).filter_by(user_id=current_user.id, event_id=event.id)).scalar_one()
+                user_event = UserEvent.get_item(current_user.id, event.id)
                 user_event.delete_item()
                 return redirect(url_for('event', id=id))
 
