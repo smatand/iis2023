@@ -75,6 +75,7 @@ class UserEvent(db.Model):
 
 
 class RoleEnum(enum.Enum):
+    deactivated = 0
     user = 1
     moderator = 2
     administrator = 3
