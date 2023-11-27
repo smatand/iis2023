@@ -1,4 +1,5 @@
 from models import Category
+from wtforms import ValidationError
 
 
 def get_category_choices():
@@ -18,3 +19,9 @@ def get_category_choices():
             if category.approved:
                 choices.extend(get_category_tree(category))
     return choices
+
+
+def validate_date(form, field):
+    if form.start_datetime.data and form.end_datetime.data:
+        if field.data <= form.start_datetime.data:
+            raise ValidationError('End time must be after start time.')

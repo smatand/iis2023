@@ -3,17 +3,11 @@ from datetime import datetime, timedelta
 from flask_wtf import FlaskForm
 from wtforms import (BooleanField, DateTimeField, IntegerField, SelectField,
                      SelectMultipleField, StringField, SubmitField,
-                     TextAreaField, ValidationError, widgets)
+                     TextAreaField, widgets)
 from wtforms.validators import DataRequired, Length, Optional
 
 from models import Category, Place, RoleEnum
-from utils import get_category_choices
-
-
-def validate_date(form, field):
-    if form.start_datetime.data and form.end_datetime.data:
-        if field.data <= form.start_datetime.data:
-            raise ValidationError('End time must be after start time.')
+from utils import get_category_choices, validate_date
 
 
 class EventForm(FlaskForm):
