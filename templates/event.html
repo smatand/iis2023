@@ -44,11 +44,13 @@
         <img class="event_image" src="{{ event.image }}" alt="Event Image">
         {% endif %}
     </div>
+    {% if current_user.is_authenticated %}
     {% if event.approved == false and current_user.role.value > 1 %}
         <form method="POST">
             {{ approval_form.hidden_tag() }}
             <button type="submit" name="approve" class="button-log">Approve</button>
         </form>
+    {% endif %}
     {% endif %}
     {% if current_user.is_authenticated and event.start_datetime > now and event.approved %}
     {% if current_user not in event.users %}
