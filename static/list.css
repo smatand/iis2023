@@ -35,6 +35,12 @@ header {
     color: #343a40;
     font-size: 16px;
 }
+
+.place-status {
+    color: #940b0b;
+    font-size: 16px;
+}
+
 .nav-button-2 {
     background-color: #007bff;
     border: none;
