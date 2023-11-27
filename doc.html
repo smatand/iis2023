@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Projekt IIS</title>
+    <style type="text/css">
+    	table { border-collapse: collapse; }
+    	td, th { border: 1px solid black; padding: 0.3em 0.5em; text-align: left; }
+    	dt { font-weight: bold; margin-top: 0.5em; }
+    </style>
+</head>
+<body>
+
+<h1>Akce a události</h1>
+
+<dl>
+	<dt>Autoři</dt>
+	<dd>Andrej Smatana
+	    <a href="mailto:xsmata03@stud.fit.vutbr.cz">xsmata03@stud.fit.vutbr.cz</a> -
+        BE, Uživatelská část FE
+	</dd>
+	<dd>Martin Maršalek
+	    <a href="mailto:xmarsa15@stud.fit.vutbr.cz">xmarsa15@stud.fit.vutbr.cz</a> - 
+		BE, Administrátorská a moderátorská část FE
+	</dd>
+  <dd>Radim Šafář
+	    <a href="mailto:xsafar27@stud.fit.vutbr.cz">xsafar27@stud.fit.vutbr.cz</a> - 
+		BE, databáze a nasazení
+	</dd>
+	<dt>URL aplikace</dt>
+	<dd><a href="https://xsmata03.fun">https://xsmata03.fun</a></dd>
+</dl>
+
+<h2>Uživatelé systému pro testování</h2>
+<p>Uveïte prosím existující zástupce <strong>v¹ech rolí u¾ivatelù</strong>.</p>
+<table>
+<tr><th>Login</th><th>Heslo</th><th>Role</th></tr>
+<tr><td>admin</td><td>adminTester123*</td><td>Administrátor</td></tr>
+<tr><td>moderator</td><td>modTester123*</td><td>Moderátor</td></tr>
+<tr><td>tester</td><td>Tester123*</td><td>Uživatel</td></tr>
+<tr><td>popocatepepl</td><td>Tester123*</td><td>Uživatel</td></tr>
+<tr><td>hraskovie</td><td>Tester123*</td><td>Uživatel</td></tr>
+</table>
+
+<h3>Video</h3>
+TODO
+<p>Přiložte odkaz na komentované video demostrující použití informačního systému. Zaměřte se na případy užití definované zadáním (např. registrace uživatele, správa uživatelù a činnosti jednotlivých rolí). Video nahrajte například na VUT Google Drive, kde ho bude možné přímo spustit z odkazu.</p> 
+
+<h2>Implementace</h2>
+<p>PostgreSQL je používaný k uchovávaniu dát (databáza). Pre frontend a backend sme použili Flask a jeho Jinja2 templates k zobrazovaniu obsahu.</p>
+<p>V súbore <code>app.py</code> nájdete nasledujúcu implementáciu jednotlivých prípadov použitia:</p>
+<ul>
+<li><b>administrátor</b>
+<ul>
+<li>spravuje uživatele</li><br>
+<code>@app.route("/users", methods=['GET', 'POST'])</code>
+<li>má práva všech následujících rolí</li>
+</ul>
+</li>
+<li><b>moderátor</b>
+<ul>
+<li>schvaluje události</li><br>
+<code>@app.route('/event/<int:id>', methods=['GET', 'POST'])</code><br>
+<code>elif attend_form.validate_on_submit() and 'approve' in request.form:</code>
+<li>schvaluje místa konání a provádí jejich správu</li><br>
+<code>@app.route('/places', methods=['GET'])</code>
+<code>@app.route('/approve_place/<int:id>', methods=['GET', 'POST'])</code>
+<li>schvaluje kategorie a provádí jejich správu</li><br>
+<code>@app.route('/categories', methods=['GET'])</code><br>
+<code>@app.route('/approve_category/<int:id>', methods=['GET', 'POST'])</code>
+<li>moderuje komentáře událostí</li><br>
+<code>@app.route('/event/<int:id>', methods=['GET', 'POST'])</code><br>
+<code>elif delete_review_form.validate_on_submit and 'delete_review'...</code>
+</ul>
+</li>
+<li><b>registrovaný uživatel</b>
+<ul>
+<li>prochází osobní kalendář událostí</li><br>
+<code>@app.route("/home")</code><br>
+<li>zakládá události - stává se <b>správcem události</b><br>
+    <code>@app.route("/create_event", methods=['GET', 'POST'])</code><br>
+    <code>@app.route('/event/<int:id>', methods=['GET', 'POST'])</code>
+<ul>
+<li>posílá žádosti o schválení události >> to je v momente vytovrenia udalosti, avšak user stále môže editovať event</li><br>
+    <code>@app.route("/create_event", methods=['GET', 'POST'])</code><br>
+    <code>@app.route("/edit_event/<int:id>", methods=['GET', 'POST'])</code>
+<li>navrhuje nová místa konání do katalogu existujících míst</li><br>
+<code>@app.route('/places', methods=['GET'])</code><br>
+<code>@app.route('/propose_place', methods=['GET', 'POST'])</code>
+<li>navrhuje nové kategorie událostí</li><br>
+<code>@app.route('/categories', methods=['GET'])</code><br>
+<code>@app.route('/propose_category', methods=['GET', 'POST'])</code>
+<li>potvrzuje úhradu vstupného předem, pokud je v dané akci vyžadováno</li><br>
+<code>@app.route('/event/<int:id>', methods=['GET', 'POST'])</code><br>
+<code>elif request_approval_form.validate_on_submit()...</code>
+</ul>
+</li>
+<li>registruje se na událostí - stává se <b>účastníkem události</b></li><br>
+<code>@app.route('/event/<int:id>', methods=['GET', 'POST'])</code><br>
+<code>elif attend_form.validate_on_submit() and 'attend' in request.form:</code>
+<ul>
+<li>hodnotí a komentuje události po jejich ukončení</li><br>
+<code>@app.route('/event/<int:id>', methods=['GET', 'POST'])</code><br>
+<code>elif delete_review_form.validate_on_submit and 'delete_review' \</code><br>
+<code>if form.validate_on_submit() and 'submit_review' in request.form:</code>
+<code></code>
+</ul>
+</li>
+</ul>
+</li>
+<li><b>neregistrovaný uživatel</b>
+<ul>
+<li>prochází události</li><br>
+<code>@app.route("/", methods=['GET', 'POST'])</code>
+</ul>
+</li>
+</ul>
+
+<h3>Databáze</h3>
+<img src="./diagram.png" alt="database diagram">
+
+<h2>Instalace</h2>
+
+<h3> Požadavky </h3>
+<ul>
+    <li> Python3.10+ </li>
+    <li> Docker (na databázi) </li>
+</ul>
+
+<h3> Instalace systému </h3>
+<p>
+Pro zprovoznení systému je třeba vytvořit python virtuální prostředí a nainstalovat potřebné balíčky: <br>
+<code>
+    $ python3 -m venv env <br>
+    $ source env/bin/activate <br>
+    $ (env) pip install -r requirements.txt <br>
+</code>
+</p>
+
+<h3> Instalace databáze </h3>
+<p>
+Pro snadné nasazení databáze je přiložen <code>docker-compose.yml</code>. <br>
+Stačí tedy <code>docker compose up</code> pro spuštění databáze. <br>
+S přepínačem <code>-d</code> se kontejner spustí na pozadí.
+</p>
+
+<p>
+Následně je třeba spojit aplikaci s databází: <br>
+Při použití docker-compose není třeba měnit konfigurační soubor <code>config.yaml</code> <br>
+<code>
+    $ (env) python3 <br>
+    >>> from app import app, db <br>
+    >>> with app.app_context(): <br>
+    ...     db.create_all() <br>
+    ... <br>
+    >>> <br>
+</code>
+</p>
+
+<p>
+Pro naplnění databáze testovacími daty lze použít skript <code>fill_db.py</code>:<br>
+<code>
+    $ (env) python fill_db.py
+</code>
+</p>
+
+<h2>Známé problémy</h2>
+<p>Na poslednú chvíľu sme si všimli, že užívateľ môže zaslať moderátorom/adminom žiadosť o schválenie udalosti. Našou (alternatívnou) implementáciou užívateľ pošle žiadosť o schválenie udalosti v momente vytvorenia, avšak má možnosť meniť údaje v udalosti až do momentu schválenia. Po schválení už potvrdzuje prichádzajúce žiadosti (simulácia úhrady vstupného)</p>
+
+</body>
+</html>

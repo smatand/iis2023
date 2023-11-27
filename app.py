@@ -1,4 +1,3 @@
-import sys
 from models import (
     User,
     RoleEnum,
@@ -24,7 +23,8 @@ from forms import (
     UserSearchForm,
     UserUpdateForm,
     EventApproveRequestForm,
-    EventCancelRequestForm
+    EventCancelRequestForm,
+    DeleteEventForm
 )
 from yaml import load, FullLoader
 from sqlalchemy import and_, or_
@@ -423,6 +423,7 @@ def event(id):
     approval_form = EventApprovalForm()
     request_approval_form = EventApproveRequestForm()
     cancel_request_form = EventCancelRequestForm()
+    delete_event_form = DeleteEventForm()
     delete_review_form = DeleteReviewForm()
 
     if request.method == 'POST':
@@ -486,7 +487,6 @@ def event(id):
                 user_id=request.form.get('user_id'),
                 event_id=id
             ).first()
-            print("User Event Before: ", user_event, file=sys.stderr)
 
             user_event.approved = True
             db.session.commit()
@@ -506,6 +506,27 @@ def event(id):
         elif attend_form.validate_on_submit() and 'approve' in request.form:
             event.approved = True
             db.session.commit()
+
+        elif delete_event_form.validate_on_submit() \
+                and 'delete_event' in request.form:
+            if event.owner_id != current_user.id:
+                if current_user.role.value < RoleEnum.moderator.value:
+                    flash('You cannot delete this event')
+                    return redirect(url_for('event', id=id))
+
+            # delete all user_events for this event
+            user_events = UserEvent.query.filter_by(event_id=id).all()
+            for user_event in user_events:
+                db.session.delete(user_event)
+
+            reviews = Review.query.filter_by(event_id=id).all()
+            for review in reviews:
+                db.session.delete(review)
+
+            db.session.delete(event)
+            db.session.commit()
+            flash('Event has been deleted!', 'success')
+            return redirect(url_for('index'))
 
         elif cancel_attend_form.validate_on_submit():
             if 'cancel_attend' in request.form:
@@ -551,7 +572,8 @@ def event(id):
                            cancel_attend_form=cancel_attend_form,
                            approval_form=approval_form,
                            request_approval_form=request_approval_form,
-                           user_events=user_events)
+                           user_events=user_events,
+                           delete_form=delete_event_form)
 
 
 @app.route('/propose_place', methods=['GET', 'POST'])

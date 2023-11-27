@@ -155,6 +155,10 @@ class DeleteReviewForm(FlaskForm):
     submit = SubmitField('Delete review')
 
 
+class DeleteEventForm(FlaskForm):
+    submit = SubmitField('Delete event')
+
+
 class FilterForm(FlaskForm):
     name = StringField('Name', validators=[Optional()])
     category = SelectMultipleField(

@@ -3,6 +3,12 @@
 {% block content %}
 <div class="event_details">
     <h2>{{ event.name }}</h2>
+    {% if current_user == event.owner or current_user.role.value > 1 %}
+        <form method="POST">
+            {{ delete_form.hidden_tag() }}
+            <button type="submit" name="delete_event" class="button-log">Delete event</button>
+        </form>
+    {% endif %}
     {% if event.approved == false %}
     <div style="color: red;"">UNAPPROVED: Waiting for approval from moderators</div>
             <a href=" {{ url_for('edit_event', id=event.id) }}" class="button-log">Edit Event</a>
