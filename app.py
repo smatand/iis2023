@@ -259,23 +259,10 @@ def logout():
 @login_required
 def create_event():
     form = EventForm()
+    # only get categories that are approved
     form.category_ids.choices = get_category_choices()
     form.category_ids.choices.pop(0)
     if form.validate_on_submit():
-        # only get categories that are approved
-        category_ids = [
-            id for id, checked in zip([choice[0] for choice
-                                       in form.category_ids.choices
-                                       ], form.category_ids.data) if checked]
-        form.category_ids.choices = get_category_choices()
-
-        admission_ids = [
-            id for id, checked in zip([choice[0] for choice
-                                       in form.admission_ids.choices
-                                       ], form.admission_ids.data) if checked]
-
-        place_id = form.place_id.data
-
         event = Event()
         event.name = form.name.data
         event.start_datetime = form.start_datetime.data
@@ -283,15 +270,18 @@ def create_event():
         event.capacity = form.capacity.data
         event.description = form.description.data
         event.image = form.image.data
-        event.place_id = place_id
+        event.place_id = form.place_id.data
         event.owner_id = current_user.id
 
-        categories = Category.query.filter(Category.id.in_(category_ids)).all()
+        checked_boxes = form.category_ids.data
+        categories = Category.query.filter(Category.id.in_(checked_boxes)
+                                           ).all()
         for category in categories:
             event.categories.append(category)
 
+        checked_boxes = form.admission_ids.data
         admissions = Admission.query.filter(
-            Admission.id.in_(admission_ids)
+            Admission.id.in_(checked_boxes)
             ).all()
         for admission in admissions:
             event.admissions.append(admission)
@@ -305,7 +295,6 @@ def create_event():
 
         db.session.add(event)
         db.session.commit()
-
         flash(
             'Event has been created. Wait for the approval from moderators',
             'success'
@@ -334,16 +323,6 @@ def edit_event(id):
     form.category_ids.choices.pop(0)
 
     if form.validate_on_submit():
-        category_ids = [
-            id for id, checked in zip([choice[0] for choice
-                                       in form.category_ids.choices
-                                       ], form.category_ids.data) if checked]
-        form.category_ids.choices = get_category_choices()
-        admission_ids = [
-            id for id, checked in zip([choice[0] for choice
-                                      in form.admission_ids.choices],
-                                      form.admission_ids.data) if checked]
-
         event.start_datetime = form.start_datetime.data
         event.end_datetime = form.end_datetime.data
         event.capacity = form.capacity.data
@@ -351,13 +330,16 @@ def edit_event(id):
         event.image = form.image.data
         event.place_id = form.place_id.data
 
-        categories = Category.query.filter(Category.id.in_(category_ids)).all()
+        checked_boxes = form.category_ids.data
+        categories = Category.query.filter(
+            Category.id.in_(checked_boxes)).all()
         event.categories.clear()
         for category in categories:
             event.categories.append(category)
 
+        checked_boxes = form.admission_ids.data
         admissions = Admission.query.filter(
-            Admission.id.in_(admission_ids)
+            Admission.id.in_(checked_boxes)
             ).all()
         event.admissions.clear()
         for admission in admissions:
