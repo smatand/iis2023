@@ -1,4 +1,3 @@
-import sys
 from models import (
     User,
     RoleEnum,
@@ -483,7 +482,6 @@ def event(id):
                 user_id=request.form.get('user_id'),
                 event_id=id
             ).first()
-            print("User Event Before: ", user_event, file=sys.stderr)
 
             user_event.approved = True
             db.session.commit()
