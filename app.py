@@ -1,23 +1,48 @@
-import calendar
-from datetime import datetime as dt
-from datetime import timedelta
-
-from flask import (Flask, flash, redirect, render_template, request, session,
-                   url_for)
-from flask_bcrypt import Bcrypt
-from flask_login import (LoginManager, current_user, login_required,
-                         login_user, logout_user)
-from flask_migrate import Migrate
+from models import (
+    User,
+    RoleEnum,
+    db,
+    Event,
+    Place,
+    Category,
+    Review
+)
+from forms import (
+    EventForm,
+    PlaceForm,
+    CategoryForm,
+    ReviewForm,
+    FilterForm,
+    EventAttendanceForm,
+    EventAttendanceCancelForm,
+    EventApprovalForm,
+    DeleteReviewForm,
+    EditEventForm,
+    UserSearchForm,
+    UserUpdateForm
+)
+from yaml import load, FullLoader
 from sqlalchemy import and_, or_
-from yaml import FullLoader, load
-
-from forms import (CategoryForm, DeleteReviewForm, EditEventForm,
-                   EventAttendanceCancelForm, EventAttendanceForm, EventForm,
-                   FilterForm, PlaceForm, ReviewForm, UserSearchForm,
-                   UserUpdateForm, EventApprovalForm)
-from models import (Category, Event, Place, Review, RoleEnum, User, UserEvent,
-                    db)
+from flask_bcrypt import Bcrypt
+from datetime import datetime as dt, timedelta
+import calendar
 from utils import get_category_choices
+from flask import (
+    redirect,
+    request,
+    Flask,
+    render_template,
+    url_for,
+    flash,
+    session
+)
+from flask_login import (
+    LoginManager,
+    login_user,
+    login_required,
+    logout_user,
+    current_user
+)
 
 with open("config.yaml") as f:
     cfg = load(f, Loader=FullLoader)
@@ -31,7 +56,6 @@ database = cfg["database"]["name"]
 
 
 app = Flask(__name__)
-migrate = Migrate(app, db)
 
 app.config.update(
     SQLALCHEMY_DATABASE_URI=(
@@ -227,9 +251,9 @@ def logout():
 def create_event():
     form = EventForm()
     form.category_ids.choices = get_category_choices()
-    # remove -----no parent category----
     form.category_ids.choices.pop(0)
     if form.validate_on_submit():
+        # only get categories that are approved
         category_ids = [
             id for id, checked in zip([choice[0] for choice
                                        in form.category_ids.choices
@@ -386,11 +410,8 @@ def event(id):
                 flash('Sorry, this event is full')
                 return redirect(url_for('event', id=id))
 
-            user_event = UserEvent(
-                    event_id=event.id,
-                    user_id=current_user.id
-                )
-            user_event.insert()
+            event.users.append(current_user)
+            db.session.commit()
             return redirect(url_for('event', id=id))
 
         elif attend_form.validate_on_submit() and 'approve' in request.form:
@@ -403,8 +424,8 @@ def event(id):
                     flash('You are not a participant of this event')
                     return redirect(url_for('event', id=id))
 
-                user_event = UserEvent.get_item(current_user.id, event.id)
-                user_event.delete_item()
+                event.users.remove(current_user)
+                db.session.commit()
                 return redirect(url_for('event', id=id))
 
     # don't show unapproved events to users who are not owners
@@ -464,7 +485,14 @@ def propose_place():
 @app.route('/places', methods=['GET'])
 @login_required
 def places():
-    places = Place.query.all()
+    places = []
+    if current_user.role == RoleEnum.moderator or \
+            current_user.role == RoleEnum.administrator:
+        places = Place.query.all()
+    else:
+        # user will see only approved places
+        places = Place.query.filter_by(approved=True).all()
+
     events = Event.query.all()
     return render_template('places.html', places=places, events=events)
 
@@ -472,8 +500,16 @@ def places():
 @app.route('/categories', methods=['GET'])
 @login_required
 def categories():
-    categories = Category.query.all()
+    categories = []
     events = Event.query.all()
+
+    if current_user.role == RoleEnum.moderator or \
+            current_user.role == RoleEnum.administrator:
+        categories = Category.query.all()
+    else:
+        # user will see only approved categories
+        categories = Category.query.filter_by(approved=True).all()
+
     return render_template(
         'categories.html',
         categories=categories,

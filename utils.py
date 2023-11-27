@@ -2,15 +2,19 @@ from models import Category
 
 
 def get_category_choices():
-    categories = Category.query.all()
+    # query only approved categories
+    categories = Category.query.filter_by(approved=True).all()
 
     def get_category_tree(category, prefix=''):
         choices = [(category.id, prefix + category.name)]
         for subcategory in category.children:
-            choices.extend(get_category_tree(subcategory, prefix + '-'))
+            # if approved
+            if subcategory.approved:
+                choices.extend(get_category_tree(subcategory, prefix + '>'))
         return choices
-    choices = []
+    choices = [(None, '---none---')]
     for category in categories:
         if category.parent is None:
-            choices.extend(get_category_tree(category))
+            if category.approved:
+                choices.extend(get_category_tree(category))
     return choices

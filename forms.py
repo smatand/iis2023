@@ -149,6 +149,7 @@ class FilterForm(FlaskForm):
     def __init__(self, *args, **kwargs):
         super(FilterForm, self).__init__(*args, **kwargs)
         self.category.choices = get_category_choices()
+        self.category.choices.pop(0)  # pop none choice
         self.place.choices = [(p.id, p.name) for p in Place.query.all()]
 
 
