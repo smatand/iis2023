@@ -25,7 +25,7 @@
       {% endif %}
       <div class="form-field">
         <label for="capacity">{{ form.capacity.label }}*<span>:</span></label>
-        {{ form.capacity(value=5) }}
+        {{ form.capacity() }}
       </div>
       <div class="form-field">
         <label for="image">{{ form.image.label }}<span>:</span></label>
@@ -33,7 +33,7 @@
       </div>
       <div class="form-field">
         <label for="place_id">{{ form.place_id.label }}*<span>:</span></label>
-        {{ form.place_id(value=1) }}
+        {{ form.place_id() }}
       </div>
       <div class=""form-field">
         <label for="category_id">{{ form.category_ids.label }}<span>:</span></label>
