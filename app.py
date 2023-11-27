@@ -206,7 +206,7 @@ def register():
         user = User()
         user.name = username
         user.password = bcrypt.generate_password_hash(password).decode('utf-8')
-        user.role = RoleEnum.administrator
+        user.role = RoleEnum.user
         user.insert()
 
         return redirect(url_for('login'))
