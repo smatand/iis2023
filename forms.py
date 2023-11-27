@@ -46,7 +46,9 @@ class EventForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(EventForm, self).__init__(*args, **kwargs)
-        self.place_id.choices = [(p.id, p.name) for p in Place.query.all()]
+        self.place_id.choices = [(p.id, p.name) for p in Place.query.filter_by(
+            approved=True
+        )]
         self.category_ids.choices = [
             (c.id, c.name) for c in Category.query.all()
             ]
@@ -91,7 +93,9 @@ class EditEventForm(FlaskForm):
 
     def __init__(self, *args, **kwargs):
         super(EditEventForm, self).__init__(*args, **kwargs)
-        self.place_id.choices = [(p.id, p.name) for p in Place.query.all()]
+        self.place_id.choices = [(p.id, p.name) for p in Place.query.filter_by(
+            approved=True
+            ).all()]
         self.category_ids.choices = [
             (c.id, c.name) for c in Category.query.all()
             ]
@@ -171,12 +175,15 @@ class FilterForm(FlaskForm):
         widget=widgets.ListWidget(prefix_label=False))
 
     approved = BooleanField('Only approved', default=False)
+    has_admission = BooleanField('Has admission', default=False)
 
     def __init__(self, *args, **kwargs):
         super(FilterForm, self).__init__(*args, **kwargs)
         self.category.choices = get_category_choices()
         self.category.choices.pop(0)  # pop none choice
-        self.place.choices = [(p.id, p.name) for p in Place.query.all()]
+        self.place.choices = [(p.id, p.name) for p in Place.query.filter_by(
+            approved=True
+        )]
 
 
 class UserSearchForm(FlaskForm):

@@ -88,3 +88,22 @@ label {
 .delete-button:hover {
     background-color: rgb(255, 0, 0);
 }
+.delete-button-2 {
+    right: 10px;
+    bottom: 50px;
+    border-radius: 5px;
+    border: none;
+    background-color: rgb(186, 28, 28);
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+}.delete-button-2:hover {
+    right: 10px;
+    bottom: 50px;
+    border-radius: 5px;
+    border: none;
+    background-color: rgb(255, 0, 0);
+    color: white;
+    padding: 10px;
+    cursor: pointer;
+}

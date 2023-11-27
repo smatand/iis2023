@@ -38,13 +38,15 @@ if __name__ == "__main__":
     incheba = Place(
             name="Incheba expo",
             address="Viedenská cesta 3409/5, 851 01 Petržalka",
-            description="multifunkčná hala"
+            description="multifunkčná hala",
+            approved=True
             )
 
     vodaren = Place(
             name="Vodárenské múzeum",
             address="Devínska cesta 5364, 841 04 Karlova Ves",
-            description="múzeum vodárenstva"
+            description="múzeum vodárenstva",
+            approved=True
             )
 
     hala = Place(
@@ -56,7 +58,8 @@ if __name__ == "__main__":
     vystaviste = Place(
             name="Brněnské výstaviště",
             address="603 00 Brno-Pisárky, Česko",
-            description="český výstavní areál"
+            description="český výstavní areál",
+            approved=True
             )
     d105 = Place(
                 name="D105",
@@ -153,11 +156,11 @@ if __name__ == "__main__":
     db.session.commit()
 
     student_admission = Admission(
-            name="student",
+            name="študent",
             amount=10
     )
     adult_admission = Admission(
-                name="adult",
+                name="dospelý",
                 amount=20
         )
     db.session.add(student_admission)
@@ -206,6 +209,7 @@ if __name__ == "__main__":
     db.session.add(user2)
     db.session.add(user3)
     db.session.add(mod)
+    db.session.add(admin)
     db.session.commit()
 
     futbal_zapas = Event(
@@ -325,6 +329,10 @@ if __name__ == "__main__":
     ))
     db.session.add(UserEvent(
         event_id=5,
+        user_id=1,
+    ))
+    db.session.add(UserEvent(
+        event_id=1,
         user_id=1,
     ))
     db.session.commit()
