@@ -14,7 +14,7 @@ from yaml import FullLoader, load
 from forms import (CategoryForm, DeleteReviewForm, EditEventForm,
                    EventAttendanceCancelForm, EventAttendanceForm, EventForm,
                    FilterForm, PlaceForm, ReviewForm, UserSearchForm,
-                   UserUpdateForm)
+                   UserUpdateForm, EventApprovalForm)
 from models import (Category, Event, Place, Review, RoleEnum, User, UserEvent,
                     db)
 from utils import get_category_choices
