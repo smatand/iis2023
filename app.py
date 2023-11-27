@@ -107,28 +107,24 @@ def index():
         category_ids = form.category.data
         place_ids = form.place.data
         approved = form.approved.data
+        has_admission = form.has_admission.data
 
-        if approved is False:
-            events = Event.query.filter(and_(
-                Event.name.ilike('%{}%'.format(name)),
-                or_(*[Event.categories.any(
-                    id=category_id
-                    ) for category_id in category_ids]),
-                or_(*[Event.place.has(
-                    id=place_id
-                    ) for place_id in place_ids]),
-            )).all()
-        else:
-            events = Event.query.filter(and_(
-                Event.name.ilike('%{}%'.format(name)),
-                or_(Event.approved.is_(True)),
-                or_(*[Event.categories.any(
-                    id=category_id
-                    ) for category_id in category_ids]),
-                or_(*[Event.place.has(
-                    id=place_id
-                    ) for place_id in place_ids])
-            )).all()
+        filters = [
+            Event.name.ilike('%{}%'.format(name)),
+            or_(*[Event.categories.any(
+                id=category_id
+                ) for category_id in category_ids]),
+            or_(*[Event.place.has(id=place_id) for place_id in place_ids])
+        ]
+
+        if approved:
+            filters.append(or_(Event.approved.is_(True)))
+
+        if has_admission:
+            filters.append(or_(Event.admissions.any()))
+
+        # filter
+        events = Event.query.filter(and_(*filters)).all()
     else:
         events = Event.query.all()
 
@@ -340,14 +336,12 @@ def edit_event(id):
                                       in form.admission_ids.choices],
                                       form.admission_ids.data) if checked]
 
-        place_id = form.place_id.data
-
         event.start_datetime = form.start_datetime.data
         event.end_datetime = form.end_datetime.data
         event.capacity = form.capacity.data
         event.description = form.description.data
         event.image = form.image.data
-        event.place_id = place_id
+        event.place_id = form.place_id.data
 
         categories = Category.query.filter(Category.id.in_(category_ids)).all()
         event.categories.clear()
