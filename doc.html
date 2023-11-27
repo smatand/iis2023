@@ -156,6 +156,7 @@ Při použití docker-compose není třeba měnit konfigurační soubor <code>co
     >>> <br>
 </code>
 </p>
+Nebo zkopírovat skript z <code>create_tables.sql</code> přímo do databáze.
 
 <p>
 Pro naplnění databáze testovacími daty lze použít skript <code>fill_db.py</code>:<br>
@@ -163,6 +164,10 @@ Pro naplnění databáze testovacími daty lze použít skript <code>fill_db.py<
     $ (env) python fill_db.py
 </code>
 </p>
+Pak
+<code>
+    $ (env) flask run
+</code>
 
 <h2>Známé problémy</h2>
 <p>Na poslednú chvíľu sme si všimli, že užívateľ môže zaslať moderátorom/adminom žiadosť o schválenie udalosti. Našou (alternatívnou) implementáciou užívateľ pošle žiadosť o schválenie udalosti v momente vytvorenia, avšak má možnosť meniť údaje v udalosti až do momentu schválenia. Po schválení už potvrdzuje prichádzajúce žiadosti (simulácia úhrady vstupného)</p>
