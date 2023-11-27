@@ -1,3 +1,4 @@
+import sys
 from models import (
     User,
     RoleEnum,
@@ -21,7 +22,9 @@ from forms import (
     DeleteReviewForm,
     EditEventForm,
     UserSearchForm,
-    UserUpdateForm
+    UserUpdateForm,
+    EventApproveRequestForm,
+    EventCancelRequestForm
 )
 from yaml import load, FullLoader
 from sqlalchemy import and_, or_
@@ -379,18 +382,18 @@ def edit_event(id):
                            form=form, event=event)
 
 
-
 @app.route("/home")
 @login_required
 def home():
     month, year = get_month_year()
     month_name = calendar.month_name[month]
 
-    events = Event.query.filter(Event.users.contains(current_user)).all()
+    #events = Event.query.filter(Event.users.contains(current_user)).all()
+    user_events = UserEvent.query.filter_by(user_id=current_user.id).all()
 
     return render_template(
         'home.html',
-        events=events,
+        events=user_events,
         calendar=calendar,
         month=month,
         year=year,
@@ -401,12 +404,21 @@ def home():
 @app.route('/event/<int:id>', methods=['GET', 'POST'])
 def event(id):
     event = Event.query.get(id)
+    user_events = UserEvent.query.filter_by(event_id=id).all()
     now = dt.now()
-    filled_capacity = len(event.users)
+    # only events that have user_event.approved = True
+    event_users = UserEvent.query.filter_by(
+        event_id=id,
+        approved=True
+    ).all()
+    filled_capacity = len(event_users)
+
     form = ReviewForm()
     attend_form = EventAttendanceForm()
     cancel_attend_form = EventAttendanceCancelForm()
     approval_form = EventApprovalForm()
+    request_approval_form = EventApproveRequestForm()
+    cancel_request_form = EventCancelRequestForm()
 
     if request.method == 'POST':
 
@@ -444,11 +456,44 @@ def event(id):
                 flash('Sorry, this event is full')
                 return redirect(url_for('event', id=id))
 
-            user_event = UserEvent(
-                user_id=current_user.id,
-                event_id=id
-            )
+            if event.admissions:
+                user_event = UserEvent(
+                    user_id=current_user.id,
+                    event_id=id,
+                    approved=False
+                )
+                flash('Your request has been sent to the event owner')
+            else:
+                user_event = UserEvent(
+                    user_id=current_user.id,
+                    event_id=id
+                    # approved is defaultly True
+                )
+
             db.session.add(user_event)
+            db.session.commit()
+            return redirect(url_for('event', id=id))
+
+        elif request_approval_form.validate_on_submit() \
+                and 'approve_request' in request.form:
+            user_event = UserEvent.query.filter_by(
+                user_id=request.form.get('user_id'),
+                event_id=id
+            ).first()
+            print("User Event Before: ", user_event, file=sys.stderr)
+
+            user_event.approved = True
+            db.session.commit()
+            return redirect(url_for('event', id=id))
+
+        elif cancel_request_form.validate_on_submit() \
+                and 'cancel_request' in request.form:
+            user_event = UserEvent.query.filter_by(
+                user_id=request.form.get('user_id'),
+                event_id=id
+            ).first()
+
+            db.session.delete(user_event)
             db.session.commit()
             return redirect(url_for('event', id=id))
 
@@ -469,19 +514,12 @@ def event(id):
                 db.session.delete(user_event)
                 db.session.commit()
                 return redirect(url_for('event', id=id))
-#                if current_user not in event.users:
-#                    flash('You are not a participant of this event')
-#                    return redirect(url_for('event', id=id))
-#
-#                event.users.remove(current_user)
-#                db.session.commit()
-#                return redirect(url_for('event', id=id))
 
     # don't show unapproved events to users who are not owners
     if (not event.approved and event.owner_id != current_user.id and
             current_user.role.value < RoleEnum.moderator.value):
         flash(
-            'You cannot see details of unapproved event, '
+            'You cannot see details of an unapproved event, '
             'that has not been created by you!')
         return redirect(url_for('index'))
 
@@ -489,7 +527,9 @@ def event(id):
                            filled_capacity=filled_capacity,
                            attend_form=attend_form,
                            cancel_attend_form=cancel_attend_form,
-                           approval_form=approval_form)
+                           approval_form=approval_form,
+                           request_approval_form=request_approval_form,
+                           user_events=user_events)
 
 
 @app.route('/propose_place', methods=['GET', 'POST'])
