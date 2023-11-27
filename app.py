@@ -107,28 +107,24 @@ def index():
         category_ids = form.category.data
         place_ids = form.place.data
         approved = form.approved.data
+        has_admission = form.has_admission.data
 
-        if approved is False:
-            events = Event.query.filter(and_(
-                Event.name.ilike('%{}%'.format(name)),
-                or_(*[Event.categories.any(
-                    id=category_id
-                    ) for category_id in category_ids]),
-                or_(*[Event.place.has(
-                    id=place_id
-                    ) for place_id in place_ids]),
-            )).all()
-        else:
-            events = Event.query.filter(and_(
-                Event.name.ilike('%{}%'.format(name)),
-                or_(Event.approved.is_(True)),
-                or_(*[Event.categories.any(
-                    id=category_id
-                    ) for category_id in category_ids]),
-                or_(*[Event.place.has(
-                    id=place_id
-                    ) for place_id in place_ids])
-            )).all()
+        filters = [
+            Event.name.ilike('%{}%'.format(name)),
+            or_(*[Event.categories.any(
+                id=category_id
+                ) for category_id in category_ids]),
+            or_(*[Event.place.has(id=place_id) for place_id in place_ids])
+        ]
+
+        if approved:
+            filters.append(or_(Event.approved.is_(True)))
+
+        if has_admission:
+            filters.append(or_(Event.admissions.any()))
+
+        # filter
+        events = Event.query.filter(and_(*filters)).all()
     else:
         events = Event.query.all()
 
@@ -340,14 +336,12 @@ def edit_event(id):
                                       in form.admission_ids.choices],
                                       form.admission_ids.data) if checked]
 
-        place_id = form.place_id.data
-
         event.start_datetime = form.start_datetime.data
         event.end_datetime = form.end_datetime.data
         event.capacity = form.capacity.data
         event.description = form.description.data
         event.image = form.image.data
-        event.place_id = place_id
+        event.place_id = form.place_id.data
 
         categories = Category.query.filter(Category.id.in_(category_ids)).all()
         event.categories.clear()
@@ -421,6 +415,7 @@ def event(id):
     approval_form = EventApprovalForm()
     request_approval_form = EventApproveRequestForm()
     cancel_request_form = EventCancelRequestForm()
+    delete_review_form = DeleteReviewForm()
 
     if request.method == 'POST':
 
@@ -517,6 +512,22 @@ def event(id):
                 db.session.delete(user_event)
                 db.session.commit()
                 return redirect(url_for('event', id=id))
+        elif delete_review_form.validate_on_submit and 'delete_review' \
+                in request.form:
+            review_id = request.form.get('review_id')
+            review = Review.query.get(review_id)
+            if review is None:
+                return redirect(url_for('event', id=id))
+
+            if review.user_id != current_user.id and \
+                    current_user.role.value < RoleEnum.moderator.value:
+                flash('You can delete only your own reviews')
+                return redirect(url_for('home'))
+
+            db.session.delete(review)
+            db.session.commit()
+            flash('Review has been deleted!', 'success')
+            return redirect(url_for('event', id=id))
 
     # don't show unapproved events to users who are not owners
     if (not event.approved and event.owner_id != current_user.id and

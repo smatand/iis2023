@@ -14,10 +14,16 @@
     {{ form.hidden_tag() }}
     <label for="name">Name:</label>
     {{ form.name(id='name', class='form-input') }}
+
     <label for="category">Category:</label>
     {{ form.category(id='category', class='form-input') }}
+
     <label for="place">Place:</label>
     {{ form.place(id='place', class='form-input') }}
+
+    <label for="has_admission">Has admission:</label>
+    {{ form.has_admission(id='has_admission', class='form-input') }}
+
     {% if current_user.is_authenticated %}
     <label for="approved">Only approved:</label>
     {{ form.approved(id='approved', class='form-input') }}
