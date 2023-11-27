@@ -464,7 +464,8 @@ def event(id):
                     event_id=id,
                     approved=False
                 )
-                flash('Your request has been sent to the event owner')
+                flash('Your payment has been sent to the event owner.'
+                      'Wait for him to confirm the request.')
             else:
                 user_event = UserEvent(
                     user_id=current_user.id,
