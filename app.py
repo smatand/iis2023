@@ -337,7 +337,8 @@ def edit_event(id):
         form.category_ids.choices = get_category_choices()
         admission_ids = [
             id for id, checked in zip([choice[0] for choice
-                                      in form.admission_ids.choices], form.admission_ids.data) if checked]
+                                      in form.admission_ids.choices],
+                                      form.admission_ids.data) if checked]
 
         place_id = form.place_id.data
 
@@ -376,7 +377,9 @@ def edit_event(id):
         form.image.data = event.image
         form.place_id.data = event.place_id
         form.category_ids.data = [category.id for category in event.categories]
-        form.admission_ids.data = [admission.id for admission in event.admissions]
+        form.admission_ids.data = [
+            admission.id for admission in event.admissions
+            ]
 
     return render_template('edit_event.html',
                            form=form, event=event)
@@ -388,7 +391,6 @@ def home():
     month, year = get_month_year()
     month_name = calendar.month_name[month]
 
-    #events = Event.query.filter(Event.users.contains(current_user)).all()
     user_events = UserEvent.query.filter_by(user_id=current_user.id).all()
 
     return render_template(
